@@ -97,6 +97,7 @@ public class DeliveryService {
             }
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("orderId", order.getOrderId());
+            row.put("version", order.getVersion());
             row.put("status", order.getStatus());
             row.put("city", address.getCity());
             row.put("state", address.getState());
@@ -136,10 +137,16 @@ public class DeliveryService {
      */
     @Transactional
     public Map<String, Object> assign(String orderId, String driverId) {
+        return assign(orderId, driverId, null);
+    }
+
+    /** @param expectedVersion the order version the admin saw (If-Match), or null */
+    @Transactional
+    public Map<String, Object> assign(String orderId, String driverId, Long expectedVersion) {
         AppUser driver = users.findById(driverId)
                 .filter(u -> u.isActive() && u.getRoles().contains(Role.DELIVERY))
                 .orElseThrow(() -> new InvalidOrderException(driverId + " is not an active delivery user"));
-        Order order = orderStateService.lock(orderId);
+        Order order = orderStateService.lock(orderId, expectedVersion);
         requireAwaitingDriver(order);
         assignments.findLive(orderId).ifPresent(current -> {
             if (current.getStatus() == DeliveryStatus.PICKED_UP) {
@@ -269,7 +276,13 @@ public class DeliveryService {
      */
     @Transactional
     public Order returnToStock(String orderId) {
-        Order order = orderStateService.lock(orderId);
+        return returnToStock(orderId, null);
+    }
+
+    /** @param expectedVersion the order version the admin saw (If-Match), or null */
+    @Transactional
+    public Order returnToStock(String orderId, Long expectedVersion) {
+        Order order = orderStateService.lock(orderId, expectedVersion);
         if (order.getStatus() != OrderStatus.DELIVERY_FAILED) {
             throw new InvalidOrderStateException("Only an order whose delivery failed can be returned; " + orderId + " is " + order.getStatus());
         }
@@ -317,6 +330,7 @@ public class DeliveryService {
                 ShippingAddress address = order.getShippingAddress();
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("orderId", order.getOrderId());
+                row.put("version", order.getVersion());
                 row.put("status", order.getStatus());
                 row.put("deliveryStatus", assignment.getStatus());
                 row.put("attempt", assignment.getAttemptNumber());
@@ -367,6 +381,7 @@ public class DeliveryService {
         ShippingAddress address = order.getShippingAddress();
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("orderId", order.getOrderId());
+        row.put("version", order.getVersion());
         row.put("status", order.getStatus());
         row.put("deliveryStatus", assignment.getStatus());
         row.put("attempt", assignment.getAttemptNumber());

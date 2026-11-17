@@ -58,11 +58,12 @@ public class CheckoutService {
     public record Coupon(String code, String description, DiscountType discountType, BigDecimal discountValue,
                          BigDecimal maxDiscount, BigDecimal minOrderValue, LocalDateTime startsAt, LocalDateTime endsAt,
                          Integer usageLimit, int perCustomerLimit, boolean firstOrderOnly, boolean active,
-                         LocalDateTime createdAt, String createdBy, int used, List<CouponTargets.Target> appliesTo) {
+                         LocalDateTime createdAt, String createdBy, LocalDateTime updatedAt, String updatedBy,
+                         int used, List<CouponTargets.Target> appliesTo) {
 
         Coupon withTargets(List<CouponTargets.Target> targets) {
             return new Coupon(code, description, discountType, discountValue, maxDiscount, minOrderValue, startsAt,
-                    endsAt, usageLimit, perCustomerLimit, firstOrderOnly, active, createdAt, createdBy, used,
+                    endsAt, usageLimit, perCustomerLimit, firstOrderOnly, active, createdAt, createdBy, updatedAt, updatedBy, used,
                     List.copyOf(targets));
         }
 
@@ -89,11 +90,14 @@ public class CheckoutService {
                             List<String> skus, List<Long> categoryIds) {}
 
     /**
-     * What an admin may change later: switch it off or on, end it sooner, or change what it is for
+     * What an admin may change later: switch it off or on, move or remove its end, or change what it is for
      * (skus and categoryIds together replace the targets; both empty makes it a whole-order coupon).
-     * Null leaves a field. Orders already placed keep the discount they got.
+     * Null leaves a field; clearEndsAt true removes the end, so it runs until switched off.
+     * Orders already placed keep the discount they got; carts are priced by the new terms from now on.
+     * The code, the discount and the limits stay as they were: customers have been told them.
      */
-    public record CouponChange(Boolean active, LocalDateTime endsAt, List<String> skus, List<Long> categoryIds) {}
+    public record CouponChange(Boolean active, LocalDateTime endsAt, Boolean clearEndsAt,
+                               List<String> skus, List<Long> categoryIds) {}
 
     public record Window(Order.DeliveryWindow window, String label, boolean available, int placesLeft) {}
 
@@ -331,19 +335,40 @@ public class CheckoutService {
     }
 
     @org.springframework.transaction.annotation.Transactional
-    public Coupon changeCoupon(String code, CouponChange change) {
+    public Coupon changeCoupon(String code, CouponChange change, String admin) {
         String key = code.toUpperCase(Locale.ROOT);
-        coupon(key);
-        if (change != null && (change.skus() != null || change.categoryIds() != null)) {
-            // Locked like an order placing it, so no order is priced half with the old targets
-            jdbc.queryForList("select code from coupons where code = ? for update", String.class, key);
+        Coupon before = coupon(key);
+        if (change == null) {
+            return before;
+        }
+        boolean clearEnd = Boolean.TRUE.equals(change.clearEndsAt());
+        if (clearEnd && change.endsAt() != null) {
+            throw new InvalidOrderException("Either give a new end or remove the end, not both");
+        }
+        if (change.endsAt() != null && before.startsAt() != null && !change.endsAt().isAfter(before.startsAt())) {
+            throw new InvalidOrderException("The end must be after the start");
+        }
+        // Locked like an order placing it, so no order is priced half with the old terms
+        jdbc.queryForList("select code from coupons where code = ? for update", String.class, key);
+        List<String> changed = new ArrayList<>();
+        if (change.skus() != null || change.categoryIds() != null) {
             targets.replace(key, change.skus(), change.categoryIds());
+            changed.add("products");
         }
-        if (change != null && change.active() != null) {
+        if (change.active() != null && change.active() != before.active()) {
             jdbc.update("update coupons set active = ? where code = ?", change.active(), key);
+            changed.add(change.active() ? "on" : "off");
         }
-        if (change != null && change.endsAt() != null) {
+        if (change.endsAt() != null) {
             jdbc.update("update coupons set ends_at = ? where code = ?", change.endsAt(), key);
+            changed.add("end " + change.endsAt());
+        } else if (clearEnd && before.endsAt() != null) {
+            jdbc.update("update coupons set ends_at = null where code = ?", key);
+            changed.add("no end");
+        }
+        if (!changed.isEmpty()) {
+            jdbc.update("update coupons set updated_at = now(), updated_by = ? where code = ?", admin, key);
+            log.info("[COUPONS] {} changed {}: {}", admin, key, String.join(", ", changed));
         }
         return coupon(key);
     }
@@ -483,7 +508,8 @@ public class CheckoutService {
             rs.getBigDecimal("discount_value"), rs.getBigDecimal("max_discount"), rs.getBigDecimal("min_order_value"),
             time(rs.getTimestamp("starts_at")), time(rs.getTimestamp("ends_at")),
             (Integer) rs.getObject("usage_limit"), rs.getInt("per_customer_limit"), rs.getBoolean("first_order_only"),
-            rs.getBoolean("active"), time(rs.getTimestamp("created_at")), rs.getString("created_by"), rs.getInt("used"),
+            rs.getBoolean("active"), time(rs.getTimestamp("created_at")), rs.getString("created_by"),
+            time(rs.getTimestamp("updated_at")), rs.getString("updated_by"), rs.getInt("used"),
             List.of());
 
     private static LocalDateTime time(java.sql.Timestamp t) {

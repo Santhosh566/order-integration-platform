@@ -95,6 +95,12 @@ public class PartialCancelService {
      */
     @Transactional
     public Result cancelItems(String orderId, CancelItems request) {
+        return cancelItems(orderId, request, null);
+    }
+
+    /** @param expectedVersion the order version the customer saw (If-Match), or null */
+    @Transactional
+    public Result cancelItems(String orderId, CancelItems request, Long expectedVersion) {
         if (orderId == null || orderAccess.findVisible(orderId) == null) {
             throw new OrderNotFoundException(orderId);
         }
@@ -111,7 +117,7 @@ public class PartialCancelService {
             wanted.merge(line.sku(), line.quantity(), Integer::sum);
         }
 
-        Order order = orderStateService.lock(orderId);
+        Order order = orderStateService.lock(orderId, expectedVersion);
         if (!CANCELLABLE_IN_PART.contains(order.getStatus())) {
             throw new InvalidOrderStateException(order.getStatus().isCancellable()
                     ? "Order " + orderId + " is still being processed. Try again in a minute."

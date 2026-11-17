@@ -73,6 +73,17 @@ PENDING -> INVENTORY_RESERVED -> CONFIRMED -> SHIPPED -> READY_FOR_DISPATCH
   `quantity`, with `cancelledQuantity` and `activeQuantity`. The driver's parcel list, shipping, restocking
   and returns all use the active quantity. Revenue leaves out cancelled units. A dead letter replay of
   such an order is refused, because running it again would charge the full total.
+- **Acting on an order someone else changed** (`orders.version`, V24): every change to an order raises
+  its `version`. `GET /api/orders/{id}` returns it in the body and as `ETag: "7"`. Actions a person takes
+  send it back as `If-Match: "7"`: cancel, cancel items, goodwill refund, assign driver and return to stock.
+  If the order changed after they opened it (the customer cancelled, another admin assigned a driver,
+  the pipeline moved it on), nothing is done. The reply is **412** with
+  `{status: "CHANGED", reason, orderStatus, version}` and the current `ETag`, so they reload and decide
+  again. The check runs under the order's row lock, and these actions always raise the version, even
+  when they only touch other tables, such as a driver assignment or a credit note. Without `If-Match` an
+  action works on the order as it is now, so partners and scripts are unaffected. Two saves of one order
+  at the same instant are refused by Hibernate's version check, which answers **409**. The pipeline
+  always reads an order under its row lock before saving it, so the check never fails there.
 - Failures end in `OUT_OF_STOCK`, `FRAUD_REJECTED`, `PAYMENT_FAILED` or `FULFILLMENT_FAILED`.
 - `SHIPPED` means a carrier is booked. Stock leaves the reservation at `IN_TRANSIT`.
 - Every order is screened against the blacklist. Orders over $1,000 also get the full fraud evaluation.
@@ -129,7 +140,8 @@ that is off, outside its dates or used up takes it down by itself (`status: UNAV
   cost now: each line with its discount, the coupon applied or `couponError` (why not), GST, and
   whether cash on delivery is available. Nothing is saved.
 - **Coupons** (`coupons` table; admins: `GET/POST /api/admin/coupons`, `PATCH /api/admin/coupons/{code}`
-  with `active` or `endsAt`): percent (at most 90%, with an optional cap) or a flat amount; a minimum
+  with `active`, `endsAt` or `clearEndsAt: true`; the code, discount and limits cannot change once
+  customers have been told them; `updatedAt`/`updatedBy` record the last change): percent (at most 90%, with an optional cap) or a flat amount; a minimum
   order (before the discount), start and end, total uses, uses per customer, first order only.
   `GET /api/checkout/offers` lists those the signed-in customer can use. The discount comes off the
   price including GST and is shared across the lines by value (`order_items.discount`); GST is then

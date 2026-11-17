@@ -270,8 +270,14 @@ public class ReturnService {
      */
     @Transactional
     public CreditNote goodwill(String orderId, GoodwillRefund request) {
+        return goodwill(orderId, request, null);
+    }
+
+    /** @param expectedVersion the order version the admin saw (If-Match), or null */
+    @Transactional
+    public CreditNote goodwill(String orderId, GoodwillRefund request, Long expectedVersion) {
         String reason = requireText(request.reason(), "reason");
-        Order order = orderStateService.lock(orderId);
+        Order order = orderStateService.lock(orderId, expectedVersion);
         if (order.getStatus() != OrderStatus.DELIVERED) {
             throw new InvalidOrderStateException("A goodwill refund is for a delivered order; " + orderId + " is " + order.getStatus());
         }

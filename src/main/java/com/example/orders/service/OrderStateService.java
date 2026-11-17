@@ -1,7 +1,9 @@
 package com.example.orders.service;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
+import com.example.orders.exception.OrderChangedException;
 import com.example.orders.exception.OrderNotFoundException;
 import com.example.orders.model.Order;
 import com.example.orders.model.OrderStatus;
@@ -41,8 +43,42 @@ public class OrderStateService {
      * So it is read again, under the lock.
      */
     public Order lock(String orderId) {
-        Order order = orderRepository.findForUpdate(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        // The row is locked without loading the entity: with @Version, a locking query that meets an
+        // older copy already held by this transaction fails ("conflicting version") instead of
+        // returning it. Once the lock is held, the copy is read again and is then current.
+        boolean exists = !entityManager.createNativeQuery(
+                        "select 1 from orders where order_id = ?1 and deleted_at is null for update")
+                .setParameter(1, orderId)
+                .getResultList().isEmpty();
+        Order order = exists ? entityManager.find(Order.class, orderId) : null;
+        if (order == null) {
+            throw new OrderNotFoundException(orderId);
+        }
         entityManager.refresh(order);
+        return order;
+    }
+
+    /**
+     * Locks the order for an action a person took on the copy they were shown. When they say which
+     * version that was (If-Match) and the order has changed since, nothing is done: they are told
+     * what it is now and decide again. The check runs under the row lock, so nothing can slip in
+     * between it and the change.
+     * <p>
+     * The version is raised even when the action itself leaves the order's columns alone (a driver
+     * assigned, a goodwill refund recorded elsewhere), so whoever else has the order open learns
+     * that something happened to it.
+     *
+     * @param expectedVersion the version they saw, or null to act on the order as it is now
+     * @throws OrderChangedException when it is no longer that version
+     */
+    public Order lock(String orderId, Long expectedVersion) {
+        Order order = lock(orderId);
+        if (expectedVersion != null && !expectedVersion.equals(order.getVersion())) {
+            log.info("[ORDER VERSION] Order {} is at version {}; the request was made on version {}",
+                    orderId, order.getVersion(), expectedVersion);
+            throw new OrderChangedException(order, expectedVersion);
+        }
+        entityManager.lock(order, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
         return order;
     }
 

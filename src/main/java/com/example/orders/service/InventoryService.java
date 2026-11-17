@@ -242,7 +242,18 @@ public class InventoryService {
      */
     @Transactional
     public Order cancel(String orderId) {
-        Order order = orderStateService.lock(orderId);
+        return cancel(orderId, null);
+    }
+
+    /**
+     * Cancels the order a person was looking at.
+     *
+     * @param expectedVersion the version they saw (If-Match), or null for the order as it is now
+     * @throws com.example.orders.exception.OrderChangedException when it changed after they opened it
+     */
+    @Transactional
+    public Order cancel(String orderId, Long expectedVersion) {
+        Order order = orderStateService.lock(orderId, expectedVersion);
         if (order.getStatus().holdsStock()) {
             log.warn("[CANCELLATION] Restoring stock for Order {}", orderId);
             returnToAvailable(order);

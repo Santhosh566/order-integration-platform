@@ -1,10 +1,13 @@
 package com.example.orders.controller;
 
+import com.example.orders.service.IfMatch;
 import com.example.orders.service.OrderViews;
 import com.example.orders.service.PartialCancelService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,8 +32,9 @@ public class OrderAmendmentController {
     /** Cancels some units; cancelling all that is left cancels the order. */
     @PostMapping("/cancel-items")
     public Map<String, Object> cancelItems(@PathVariable String orderId,
-                                           @RequestBody PartialCancelService.CancelItems request) {
-        PartialCancelService.Result result = partialCancel.cancelItems(orderId, request);
+                                           @RequestBody PartialCancelService.CancelItems request,
+                                           @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch) {
+        PartialCancelService.Result result = partialCancel.cancelItems(orderId, request, IfMatch.version(ifMatch));
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("order", views.forCurrentViewer(result.order()));
         body.put("creditNote", result.creditNote());

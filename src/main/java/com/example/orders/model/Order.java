@@ -4,6 +4,7 @@ import com.example.orders.exception.InvalidOrderStateException;
 import com.example.orders.money.Money;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -17,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
@@ -39,6 +41,16 @@ public class Order {
     @Id
     @Column(name = "order_id")
     private String orderId;
+
+    /**
+     * Raised by every change to the row. A person's action carries the version they saw (If-Match),
+     * and one made on an older copy is refused instead of overwriting what changed since.
+     * Empty until the order is first stored, which is how a new order is told from a stored one.
+     */
+    @Version
+    @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long version;
 
     @Column(name = "customer_id", nullable = false)
     private String customerId;
@@ -203,6 +215,8 @@ public class Order {
     public static String newId() {
         return "ORD-" + UUID.randomUUID();
     }
+
+    public Long getVersion() { return version; }
 
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }

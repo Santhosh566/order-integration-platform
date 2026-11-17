@@ -1,16 +1,19 @@
 package com.example.orders.controller;
 
+import com.example.orders.delivery.DriverStatsService;
 import com.example.orders.model.DeliveryAssignment;
 import com.example.orders.model.Order;
 import com.example.orders.service.DeliveryService;
+import com.example.orders.service.IfMatch;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.example.orders.delivery.DriverStatsService;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -64,8 +67,9 @@ public class AdminDeliveryController {
     }
 
     @PostMapping("/delivery/orders/{orderId}/assign")
-    public Map<String, Object> assign(@PathVariable String orderId, @RequestBody Map<String, String> body) {
-        return deliveryService.assign(orderId, body.get("deliveryUserId"));
+    public Map<String, Object> assign(@PathVariable String orderId, @RequestBody Map<String, String> body,
+                                      @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch) {
+        return deliveryService.assign(orderId, body.get("deliveryUserId"), IfMatch.version(ifMatch));
     }
 
     @GetMapping("/delivery/orders/{orderId}/attempts")
@@ -74,8 +78,9 @@ public class AdminDeliveryController {
     }
 
     @PostMapping("/orders/{orderId}/return")
-    public Map<String, Object> returnToStock(@PathVariable String orderId) {
-        Order order = deliveryService.returnToStock(orderId);
-        return Map.of("status", order.getStatus(), "orderId", order.getOrderId());
+    public Map<String, Object> returnToStock(@PathVariable String orderId,
+                                             @RequestHeader(value = HttpHeaders.IF_MATCH, required = false) String ifMatch) {
+        Order order = deliveryService.returnToStock(orderId, IfMatch.version(ifMatch));
+        return Map.of("status", order.getStatus(), "orderId", order.getOrderId(), "version", order.getVersion());
     }
 }

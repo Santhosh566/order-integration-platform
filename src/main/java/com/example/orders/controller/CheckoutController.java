@@ -102,6 +102,6 @@ public class CheckoutController {
 
     @PatchMapping("/api/admin/coupons/{code}")
     public CheckoutService.Coupon change(@PathVariable String code, @RequestBody CheckoutService.CouponChange change) {
-        return checkout.changeCoupon(code, change);
+        return checkout.changeCoupon(code, change, currentUser.require().userId());
     }
 }

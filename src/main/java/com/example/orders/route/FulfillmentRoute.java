@@ -80,6 +80,17 @@ public class FulfillmentRoute extends RouteBuilder {
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
             .setBody(constant("{\"status\":\"NOT_FOUND\",\"reason\":\"Order not found\"}"));
 
+        // The order changed after the person opened it (If-Match): they reload and decide again
+        onException(com.example.orders.exception.OrderChangedException.class)
+            .handled(true)
+            .log(LoggingLevel.INFO, "Request on an older copy: ${exception.message}")
+            .process(OrderChangedReply.CHANGED);
+
+        onException(org.springframework.orm.ObjectOptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class)
+            .handled(true)
+            .log(LoggingLevel.WARN, "Two changes to one order at once: ${exception.message}")
+            .process(OrderChangedReply.CLASHED);
+
         onException(InvalidOrderStateException.class)
             .handled(true)
             .log(LoggingLevel.WARN, "Request refused: ${exception.message}")
@@ -226,12 +237,16 @@ public class FulfillmentRoute extends RouteBuilder {
             .bean(OrderAccessService.class, "requireOwnerOrAdmin(${header.orderId})")
             .process(exchange -> {
                 String orderId = exchange.getMessage().getHeader("orderId", String.class);
-                Order order = inventoryService.cancel(orderId);
+                // The version the person saw, if they said: a cancel on an order that moved on is refused
+                Long seen = com.example.orders.service.IfMatch.version(exchange.getMessage().getHeader("If-Match", String.class));
+                Order order = inventoryService.cancel(orderId, seen);
                 String outcome = order.getRefundedAt() != null ? "Stock restored and refund issued" : "Cancelled before payment";
 
                 exchange.getMessage().setHeader(Exchange.HTTP_RESPONSE_CODE, 200);
                 exchange.getMessage().setHeader(Exchange.CONTENT_TYPE, "application/json");
-                exchange.getMessage().setBody("{\"status\":\"CANCELLED\",\"orderId\":\"" + orderId + "\",\"message\":\"" + outcome + "\"}");
+                exchange.getMessage().setHeader("ETag", com.example.orders.service.IfMatch.etag(order.getVersion()));
+                exchange.getMessage().setBody("{\"status\":\"CANCELLED\",\"orderId\":\"" + orderId + "\",\"message\":\"" + outcome
+                        + "\",\"version\":" + order.getVersion() + "}");
             });
     }
 

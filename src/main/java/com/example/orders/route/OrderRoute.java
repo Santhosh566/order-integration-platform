@@ -79,6 +79,17 @@ public class OrderRoute extends RouteBuilder {
             .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
             .setBody(constant("{\"status\":\"NOT_FOUND\",\"reason\":\"Not found\"}"));
 
+        // The order changed after the person opened it (If-Match): they reload and decide again
+        onException(com.example.orders.exception.OrderChangedException.class)
+            .handled(true)
+            .log(LoggingLevel.INFO, "Request on an older copy: ${exception.message}")
+            .process(OrderChangedReply.CHANGED);
+
+        onException(org.springframework.orm.ObjectOptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class)
+            .handled(true)
+            .log(LoggingLevel.WARN, "Two changes to one order at once: ${exception.message}")
+            .process(OrderChangedReply.CLASHED);
+
         onException(InvalidOrderStateException.class)
             .handled(true)
             .log(LoggingLevel.WARN, "Request refused: ${exception.message}")
@@ -203,6 +214,8 @@ public class OrderRoute extends RouteBuilder {
                     .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
                     .setBody(simple("{\"status\":\"NOT_FOUND\",\"orderId\":\"${header.id}\"}"))
                 .otherwise()
+                    // The version the reader saw, for them to send back as If-Match with an action
+                    .setHeader("ETag", simple("\"${body.version}\""))
                     // A customer does not see fraud scores or our carrier cost
                     .bean(OrderViews.class, "forCurrentViewer")
                     .marshal().json()

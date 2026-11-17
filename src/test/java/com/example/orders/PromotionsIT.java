@@ -114,6 +114,44 @@ class PromotionsIT extends IntegrationTestBase {
     }
 
     @Test
+    void editingACoupon_changesCartsNotPlacedOrders_recordsWho_andCanRemoveItsEnd() {
+        String lamp = product(1000.00, null);
+        String pen = product(500.00, null);
+        LocalDateTime end = LocalDateTime.now().plusDays(10).withNano(0);
+        String code = coupon(Map.of("discountType", "PERCENT", "discountValue", 10, "skus", List.of(lamp),
+            "endsAt", end.toString()));
+        given().get("/api/admin/coupons").then()
+            .body("find { it.code == '" + code + "' }.updatedBy", nullValue());
+
+        // An order placed with it keeps its discount whatever the coupon becomes
+        String orderId = asUser(TestTokens.ALICE, "CUSTOMER").contentType(ContentType.JSON)
+            .body(Map.of("items", List.of(line(lamp, 1)), "couponCode", code))
+            .post("/api/orders").then().statusCode(202).extract().path("orderId");
+        assertThat(order(orderId).getDiscountTotal()).isEqualByComparingTo("100.00");
+
+        // Now for the pen only, and with no end
+        given().contentType(ContentType.JSON)
+            .body(Map.of("skus", List.of(pen), "categoryIds", List.of(), "clearEndsAt", true))
+            .patch("/api/admin/coupons/" + code).then().statusCode(200)
+            .body("appliesTo.sku", equalTo(List.of(pen)))
+            .body("endsAt", nullValue())
+            .body("updatedBy", equalTo("ADM-001"))
+            .body("updatedAt", not(nullValue()));
+        assertThat(order(orderId).getDiscountTotal()).isEqualByComparingTo("100.00");
+        assertThat(quote(List.of(line(lamp, 1)), code).getString("couponError")).contains("none of them is in your cart");
+
+        // A new end; not both at once, and not before it starts
+        given().contentType(ContentType.JSON).body(Map.of("endsAt", end.toString()))
+            .patch("/api/admin/coupons/" + code).then().statusCode(200).body("endsAt", startsWith(end.toString().substring(0, 16)));
+        given().contentType(ContentType.JSON).body(Map.of("endsAt", end.toString(), "clearEndsAt", true))
+            .patch("/api/admin/coupons/" + code).then().statusCode(400).body("reason", containsString("not both"));
+        String later = coupon(Map.of("discountType", "FLAT", "discountValue", 50,
+            "startsAt", end.toString(), "endsAt", end.plusDays(5).toString()));
+        given().contentType(ContentType.JSON).body(Map.of("endsAt", end.minusDays(1).toString()))
+            .patch("/api/admin/coupons/" + later).then().statusCode(400).body("reason", containsString("after the start"));
+    }
+
+    @Test
     void bannersShowWhileWhatTheyAdvertiseCanBeBought_andCountViewsAndClicks() throws Exception {
         long gifts = category("Test gifts " + suffix(), null);
         String watch = product(2499.00, gifts);
