@@ -1,0 +1,246 @@
+# The shop's catalogue, read-only and public. Everything that changes data (orders, reviews,
+# wishlists, the admin) uses the REST API. Try it at /graphiql while developing.
+
+type Query {
+    "Products on sale: searched, filtered, sorted and paged, with counts for every filter."
+    products(filter: ProductFilter, sort: ProductSort = RELEVANCE, page: Int = 0, size: Int = 24): ProductPage!
+
+    "One product on sale, or null."
+    product(sku: ID!): Product
+
+    "The category tree: main categories with their sub-categories."
+    categories: [Category!]!
+
+    "What the search box offers while typing: products, categories and brands."
+    suggestions(text: String!, limit: Int = 8): [Suggestion!]!
+
+    "When a product would arrive at a PIN code, ordered now."
+    deliveryEstimate(sku: ID!, pin: String!): DeliveryEstimate!
+}
+
+type DeliveryEstimate {
+    outcome: DeliveryOutcome!
+    pin: String!
+    district: String
+    state: String
+    "ISO dates (2026-11-13); null unless DELIVERABLE."
+    earliest: String
+    latest: String
+    "True when the PIN is not in the India Post directory and only its postal zone is known."
+    approximate: Boolean!
+    "Minutes left to order for dispatch today; null when it goes out on a later day."
+    minutesToCutOff: Int
+    "Public holidays from today to the latest day, which the estimate skipped."
+    holidays: [HolidayNote!]!
+}
+
+type HolidayNote {
+    "ISO date."
+    date: String!
+    name: String!
+}
+
+enum DeliveryOutcome {
+    DELIVERABLE
+    UNKNOWN_PIN
+    INVALID_PIN
+    OUT_OF_STOCK
+}
+
+input ProductFilter {
+    "Words to find, in any order; small typos are forgiven."
+    text: String
+    "Category slugs; a main category includes its sub-categories."
+    categories: [String!]
+    brands: [String!]
+    "Rupees, GST included."
+    minPrice: Float
+    maxPrice: Float
+    inStockOnly: Boolean
+    "1 to 5: products rated at least this."
+    minRating: Int
+    "A coupon code: only the products it takes money off. A coupon that is not live matches nothing."
+    offer: String
+}
+
+enum ProductSort {
+    "Best match for the search words; without words, rated and in-stock products first."
+    RELEVANCE
+    PRICE_LOW_HIGH
+    PRICE_HIGH_LOW
+    NEWEST
+    TOP_RATED
+}
+
+type ProductPage {
+    items: [Product!]!
+    totalItems: Int!
+    totalPages: Int!
+    page: Int!
+    size: Int!
+    "Counts for each filter, as if that filter alone were not applied."
+    facets: Facets!
+}
+
+type Facets {
+    categories: [CategoryCount!]!
+    brands: [BrandCount!]!
+    "Cheapest and dearest product matching the other filters; null when nothing matches."
+    price: PriceRange
+}
+
+type CategoryCount {
+    slug: String!
+    name: String!
+    "Null for a main category."
+    parentSlug: String
+    count: Int!
+}
+
+type BrandCount {
+    brand: String!
+    count: Int!
+}
+
+type PriceRange {
+    min: Float!
+    max: Float!
+}
+
+type Product {
+    sku: ID!
+    name: String!
+    brand: String
+    "Rupees per piece, GST included."
+    price: Float!
+    gstRate: Float!
+    currency: String!
+    stockStatus: StockStatus!
+    description: String
+    "The main photo's thumbnail, at /api/public/images/{imageKey}."
+    imageKey: String
+    imageAlt: String
+    rating: Rating!
+    "Most units one order may hold; null for no limit."
+    maxPerOrder: Int
+    category: Category
+    images: [Image!]!
+    specs: [Spec!]!
+    "Products like this one: same category, similar price, in stock first. At most 12."
+    related(limit: Int = 8): [Product!]!
+    "Approved reviews with words, from customers who received the product. size is at most 50."
+    reviews(sort: ReviewSort = NEWEST, page: Int = 0, size: Int = 10): ReviewPage!
+    "Live coupons that take money off this product: ones for chosen products first, then whole-order ones."
+    offers: [Offer!]!
+}
+
+"A coupon on offer. Whether a customer may still use it (once each, first order only) is checked at checkout."
+type Offer {
+    code: String!
+    description: String!
+    discountType: DiscountType!
+    "Percent, or rupees for FLAT."
+    discountValue: Float!
+    "The most a percent coupon takes off, in rupees; null for no cap."
+    maxDiscount: Float
+    "Rupees of the products it is for (of the whole order when not targeted) needed to use it."
+    minOrderValue: Float!
+    "ISO date and time it ends; null for no end."
+    endsAt: String
+    firstOrderOnly: Boolean!
+    "True: for chosen products or categories only. False: for any order."
+    targeted: Boolean!
+}
+
+enum DiscountType {
+    PERCENT
+    FLAT
+}
+
+enum ReviewSort {
+    NEWEST
+    HIGHEST
+    LOWEST
+}
+
+type ReviewPage {
+    items: [Review!]!
+    totalItems: Int!
+    totalPages: Int!
+    page: Int!
+    size: Int!
+}
+
+type Review {
+    id: ID!
+    "First name and initial, e.g. Alice S."
+    author: String!
+    "1 to 5 stars."
+    rating: Int!
+    title: String
+    body: String
+    "ISO date and time."
+    createdAt: String!
+    edited: Boolean!
+    "Always true: only customers who received the product can review it."
+    verifiedPurchase: Boolean!
+}
+
+enum StockStatus {
+    IN_STOCK
+    FEW_LEFT
+    OUT_OF_STOCK
+}
+
+type Rating {
+    "0 when nobody has rated it."
+    average: Float!
+    "Approved ratings, with or without words."
+    count: Int!
+    "Approved ratings with 1, 2, 3, 4 and 5 stars, in that order."
+    distribution: [Int!]!
+    "Approved ratings that have a title or text."
+    reviewCount: Int!
+}
+
+type Category {
+    id: ID!
+    slug: String!
+    name: String!
+    parentSlug: String
+    parentName: String
+    children: [Category!]!
+    "A photo for the category's tile: its best product's (in stock, best rated). Only in the categories query."
+    imageKey: String
+    "Products on sale in it and its sub-categories. Only in the categories query."
+    productCount: Int
+}
+
+type Image {
+    id: ID!
+    largeKey: String!
+    thumbKey: String!
+    altText: String
+    width: Int!
+    height: Int!
+}
+
+type Spec {
+    name: String!
+    value: String!
+}
+
+type Suggestion {
+    kind: SuggestionKind!
+    label: String!
+    "Set for a product."
+    sku: ID
+    "Set for a category."
+    slug: String
+}
+
+enum SuggestionKind {
+    PRODUCT
+    CATEGORY
+    BRAND
+}

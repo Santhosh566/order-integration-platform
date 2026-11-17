@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>order-integration-platform</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Order Integration Platform</name>
+    <description>Order processing and integration platform built step by step with Spring Boot and Apache Camel</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <java.version>21</java.version>
+        <!-- 4.22 is built for Spring Boot 4.1. 4.18 (the last for Boot 3.5) breaks nested sagas after a split or multicast -->
+        <camel.version>4.22.2</camel.version>
+        <!-- Spring Boot 4 no longer manages REST Assured -->
+        <rest-assured.version>6.3.0</rest-assured.version>
+        <!-- 1.x speaks a Docker API version that current Docker engines refuse -->
+        <testcontainers.version>2.0.5</testcontainers.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Camel Bill of Materials (BOM) -->
+            <dependency>
+                <groupId>org.apache.camel.springboot</groupId>
+                <artifactId>camel-spring-boot-bom</artifactId>
+                <version>${camel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Spring Boot Web Starter (embedded Tomcat) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+
+        <!-- Login and roles: Spring Security with JWT bearer tokens signed by this app -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Camel Spring Boot Starter (CamelContext, Direct, Log, REST DSL) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Platform HTTP Starter (serves REST DSL endpoints on the Spring Boot web server) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-platform-http-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Jackson Starter (JSON to Java objects and back) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-jackson3-starter</artifactId>
+        </dependency>
+
+        <!-- Camel JSONPath Starter (read fields straight from JSON text) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-jsonpath-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Data JPA and the PostgreSQL driver -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Camel JPA Starter (persist entities from a route) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-jpa-starter</artifactId>
+        </dependency>
+
+        <!-- Camel SQL Starter (SQL queries and the JDBC idempotent repository) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-sql-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Kafka Starter (produce and consume Kafka messages) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-kafka-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Resilience4j Starter (Circuit Breaker EIP) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-resilience4j-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Saga Starter (Distributed Saga Coordinator EIP) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-saga-starter</artifactId>
+        </dependency>
+
+        <!-- Camel LRA Starter: sagas kept in the Narayana LRA coordinator, so they survive a pod stopping -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-lra-starter</artifactId>
+            <exclusions>
+                <!-- Its callback routes use the REST component, which here is platform-http.
+                     A second servlet would also break Spring Security's URL rules. -->
+                <exclusion>
+                    <groupId>org.apache.camel.springboot</groupId>
+                    <artifactId>camel-servlet-starter</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Camel File Starter (Dropship B2B Partner file watcher) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-file-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Bindy Starter (CSV unmarshalling to Java objects) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-bindy-starter</artifactId>
+        </dependency>
+
+        <!-- Camel JAXB Starter (XML unmarshalling to Java objects) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-jaxb-starter</artifactId>
+        </dependency>
+
+        <!-- Camel JSON Validator Starter (JSON Schema validation) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-json-validator-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Caffeine Starter (Customer Profile & Tax In-Memory Cache) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-caffeine-starter</artifactId>
+        </dependency>
+
+        <!-- Camel Mail Starter (order emails over SMTP; Mailpit catches them in development) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-mail-starter</artifactId>
+        </dependency>
+
+        <!-- Flyway (versioned database migrations) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <!-- Flyway 10+ ships each database's support as a separate module -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
+        <!-- OpenPDF (Invoice PDF Generator for Claim Check EIP) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.39</version>
+        </dependency>
+
+        <!-- Spring Boot Actuator for Health & Observability -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Camel Micrometer Starter (Route Metrics, Timer, Counter) -->
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-micrometer-starter</artifactId>
+        </dependency>
+
+        <!-- Micrometer Prometheus Registry (/actuator/prometheus) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- Test stack: JUnit 5, REST Assured and Testcontainers (real Postgres, Kafka and Mailpit) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Turns on the Prometheus registry in tests (off by default in Spring Boot tests) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-micrometer-metrics-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${rest-assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- GraphQL for the shop's catalogue reads (search, filters, product page); version from Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-graphql</artifactId>
+        </dependency>
+
+        <!-- Product photos: MinIO (S3-compatible) storage, resizing, and reading WebP uploads -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>9.0.3</version>
+        </dependency>
+        <!-- OkHttp 5 (used by the MinIO client) keeps its classes in okhttp-jvm; Maven gets only an
+             empty "okhttp" jar unless this is named. Same version as MinIO asks for. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-jvm</artifactId>
+            <version>5.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.21</version>
+        </dependency>
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>3.15.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-minio</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Duser.timezone=Asia/Kolkata</argLine>
+                </configuration>
+            </plugin>
+            <!-- The test classes need Docker and are named *IT, so they run on `mvn verify` -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- As OrderApplication.main does: the shop's times are India time -->
+                    <argLine>-Duser.timezone=Asia/Kolkata</argLine>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            The web app (../order-platform-web) is served from this jar in production. Build it first
+            with `npm run build`; this profile then copies its dist/ into the jar's static/ folder.
+            Without a build it stays off, and in development Vite serves the app on :5173 instead.
+        -->
+        <profile>
+            <id>web</id>
+            <activation>
+                <file>
+                    <!-- Maven 3.6 resolves only ${basedir} here -->
+                    <exists>${basedir}/../order-platform-web/dist/index.html</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-web-app</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.basedir}/../order-platform-web/dist</directory>
+                                            <!-- Source maps stay out of the shipped jar -->
+                                            <excludes>
+                                                <exclude>**/*.map</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

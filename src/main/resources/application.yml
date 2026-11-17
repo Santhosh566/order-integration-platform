@@ -1,0 +1,228 @@
+# ==============================================================================
+# Order Integration Platform - Spring Boot & Apache Camel Configuration
+# ==============================================================================
+server:
+  port: 9091
+
+spring:
+  application:
+    name: order-integration-platform
+  # Cloud-native datasource configuration with container environment fallbacks
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/orders}
+    username: ${SPRING_DATASOURCE_USERNAME:orders}
+    password: ${SPRING_DATASOURCE_PASSWORD:orders}
+  flyway:
+    # The first run on an existing database records it as V1 and applies only newer migrations
+    baseline-on-migrate: true
+    baseline-version: 1
+    # Production sets ORDERS_FLYWAY_LOCATIONS=classpath:db/migration to leave out the demo accounts
+    locations: ${ORDERS_FLYWAY_LOCATIONS:classpath:db/migration,classpath:db/demo}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # The Keycloak realm that signs users in; its signing keys are fetched from here
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8084/realms/order-platform}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema; Hibernate only checks that the entities match it
+      ddl-auto: validate
+  # The largest upload is the India Post PIN directory CSV (about 20 MB). Photos have their own,
+  # smaller limit (orders.storage.max-upload-bytes), which answers with a clear message
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 31MB
+  graphql:
+    http:
+      path: /graphql
+    graphiql:
+      # A page to try queries at /graphiql; off in production (ORDERS_GRAPHIQL=false)
+      enabled: ${ORDERS_GRAPHIQL:true}
+    schema:
+      # Clients may read the schema in development; production turns it off with the page
+      introspection:
+        enabled: ${ORDERS_GRAPHIQL:true}
+  # The web app is served by WebAppConfig (with its own routes and caching), not Boot's default handler
+  web:
+    resources:
+      add-mappings: false
+
+# Management & Observability Endpoints (Actuator + Prometheus)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  # Spring Boot 3 moved this out of management.metrics.export
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        # Publishes the buckets behind the Grafana latency panel
+        http.server.requests: true
+
+camel:
+  # camel.springboot.* became camel.main.*; Camel ignores the old names without a warning
+  main:
+    name: OrderIntegrationPlatform
+    message-history: true
+  dataformat:
+    jackson:
+      auto-discover-object-mapper: true
+  metrics:
+    # Its meters mix tag sets (some lack routeId), which Prometheus rejects; the route
+    # policy metrics (camel_exchanges_*, camel_route_*) already cover every route
+    enable-exchange-event-notifier: false
+  component:
+    kafka:
+      brokers: ${KAFKA_BROKERS:localhost:9092}
+  lra:
+    # true: sagas live in the Narayana LRA coordinator (see compose.yaml), which compensates
+    # a saga whose pod stopped. false: sagas live in this JVM (InMemorySagaService)
+    enabled: ${ORDERS_LRA_ENABLED:true}
+    coordinator-url: ${ORDERS_LRA_COORDINATOR_URL:http://localhost:8087}
+    # Where the coordinator reaches this app; behind a load balancer, the service address, so any pod answers
+    local-participant-url: ${ORDERS_LRA_PARTICIPANT_URL:http://host.docker.internal:9091}
+
+orders:
+  invoice-dir: ${ORDERS_INVOICE_DIR:data/invoices}
+  inbox-dir: ${ORDERS_INBOX_DIR:data/inbox}
+  # Every new order is priced and charged in this currency (ISO 4217)
+  currency: INR
+  # Where customers open the shop; links in emails (back in stock, ...) point here
+  shop-url: ${ORDERS_SHOP_URL:http://localhost:5173}
+  # The business on the invoice. The GSTIN below is a placeholder: set the real one in production
+  seller:
+    legal-name: ${ORDERS_SELLER_NAME:Order Integration Platform Pvt Ltd}
+    gstin: ${ORDERS_SELLER_GSTIN:29AABCO1234F1Z5}
+    # GST registration state: name, abbreviation or GST code. Deliveries here pay CGST + SGST, elsewhere IGST
+    state: ${ORDERS_SELLER_STATE:Karnataka}
+    address: ${ORDERS_SELLER_ADDRESS:4th Floor, 80 Feet Road, Koramangala, Bengaluru 560034, Karnataka}
+  tax:
+    # true: catalogue prices include GST, as prices shown to consumers in India must
+    prices-include-tax: true
+  returns:
+    # Days after delivery a customer may ask to return items
+    window-days: ${ORDERS_RETURN_WINDOW_DAYS:7}
+  catalog:
+    # Low-stock alerts go here; leave empty to turn them off
+    stock-alert-email: ${ORDERS_STOCK_ALERT_EMAIL:inventory@example.com}
+    # How often scheduled price changes are checked
+    price-poll-ms: 60000
+  # Amounts below are in the currency above
+  pricing:
+    # Orders above this are typed HIGH_VALUE
+    high-value-above: 100000
+  risk:
+    # Orders above this are rejected by the fraud check
+    max-order-value: 500000
+  fulfillment:
+    # Orders above this also go to the white-glove priority desk
+    priority-above: 50000
+    # true: booked orders are released without warehouse signals (development stand-in)
+    # false: an order waits for both PAYMENT_CAPTURED and WAREHOUSE_PACKED
+    auto-release: ${ORDERS_AUTO_RELEASE:true}
+    # How long the first signal waits for the second before the pair is discarded
+    signal-timeout-ms: 86400000
+    # An order still at SHIPPED this long is refunded and its stock returned, so it never waits forever
+    release-deadline-ms: ${ORDERS_RELEASE_DEADLINE_MS:86400000}
+  checkout:
+    # Cash on delivery is offered for orders up to this total
+    cod-max-order-value: ${ORDERS_COD_MAX_ORDER_VALUE:50000}
+    # Customers with this many cash-on-delivery parcels returned undelivered in 180 days must pay online
+    cod-refusals-allowed: 2
+    # Orders each delivery window (morning, afternoon, evening) takes per day in each region's hub
+    slot-capacity: ${ORDERS_SLOT_CAPACITY:40}
+    # Delivery days a customer can choose from, starting at the standard delivery date
+    slot-days: 6
+  delivery:
+    # true: a timer delivers dispatched orders by itself (development stand-in)
+    # false: delivery users take, pick up and deliver orders (see DeliveryService)
+    simulate: ${ORDERS_SIMULATE_DELIVERY:false}
+    # What a driver earns (INR), stored on each attempt as it finishes; a failed attempt pays only
+    # when the driver went to the door
+    pay:
+      per-delivery: ${ORDERS_DRIVER_PAY_DELIVERY:40}
+      per-pickup: ${ORDERS_DRIVER_PAY_PICKUP:35}
+      per-failed-visit: ${ORDERS_DRIVER_PAY_FAILED_VISIT:15}
+  tracking:
+    poll-ms: 2000
+  security:
+    # The Keycloak client the web page signs in with
+    web-client-id: ${KEYCLOAK_WEB_CLIENT_ID:order-platform-web}
+  saga:
+    # A saga still open this long is cancelled and compensated. It normally takes seconds;
+    # keep it below recovery.stuck-after-ms so the coordinator, not recovery, undoes a stopped pod's saga
+    timeout-ms: ${ORDERS_SAGA_TIMEOUT_MS:300000}
+    # Networks the LRA coordinator may call /lra-participant from. Narrow this to the
+    # coordinator's address in production
+    lra-callers: ${ORDERS_LRA_CALLERS:127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+  recovery:
+    # An order still PENDING, INVENTORY_RESERVED or CONFIRMED this long after its last change is stuck
+    stuck-after-ms: ${ORDERS_RECOVERY_STUCK_AFTER_MS:900000}
+    poll-ms: 60000
+    # Retries before a PENDING order goes to the DLQ, or a paid order is refunded
+    max-attempts: 3
+  kafka:
+    # order.created is spread over this many partitions; the most consumers that can work at once, across all pods
+    order-partitions: ${ORDERS_KAFKA_ORDER_PARTITIONS:6}
+    # Consumers in each pod; orders on different partitions are processed side by side
+    order-consumers: ${ORDERS_KAFKA_ORDER_CONSUMERS:3}
+    # Live updates for the web pages, shared by every pod (OrderEventBroadcaster, LiveEventsRoute)
+    events-topic: ${ORDERS_KAFKA_EVENTS_TOPIC:platform.events}
+    # 1 for the single local broker; 3 on a production cluster
+    replication-factor: ${ORDERS_KAFKA_REPLICATION_FACTOR:1}
+  demo:
+    # Development shop: 50 categories and 160 products with photos (demo/catalogue.json). Turn it off in
+    # production, together with the demo users (ORDERS_FLYWAY_LOCATIONS=classpath:db/migration)
+    catalogue: ${ORDERS_DEMO_CATALOGUE:true}
+  pin-directory:
+    # India Post's "All India Pincode Directory" CSV (data.gov.in, GODL licence), imported once at
+    # startup into an empty table; an admin can also upload it under Operations
+    file: ${ORDERS_PIN_DIRECTORY_FILE:order-integration-platform/pincode/5c2f62fe-5afa-4119-a499-fec9d604d5bd.csv}
+  # Product photos, in MinIO or any S3-compatible store. The bucket is created by an operator; the key
+  # may only use that bucket. Locally the key is in config/application.yml (not shared, see README).
+  storage:
+    endpoint: ${ORDERS_STORAGE_ENDPOINT:http://localhost:9000}
+    bucket: ${ORDERS_STORAGE_BUCKET:order-platform-products}
+    access-key: ${ORDERS_STORAGE_ACCESS_KEY:}
+    secret-key: ${ORDERS_STORAGE_SECRET_KEY:}
+    max-upload-bytes: 5242880
+  notifications:
+    poll-ms: 1000
+    # Attempts before a message is marked FAILED; the wait doubles each time, starting here
+    max-attempts: 6
+    retry-delay-ms: 30000
+  mail:
+    # Mailpit in development (see compose.yaml)
+    host: ${ORDERS_MAIL_HOST:localhost}
+    port: ${ORDERS_MAIL_PORT:1025}
+    from: orders@example.com
+
+# Kafka broker address used in route URIs
+kafka:
+  brokers: ${KAFKA_BROKERS:localhost:9092}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{camel.breadcrumbId:-}] [%X{correlationId:-}] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.apache.camel: INFO
+    com.example.orders: DEBUG

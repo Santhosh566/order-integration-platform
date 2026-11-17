@@ -1,0 +1,16 @@
+{
+  "orderId": "ORD-SCHEMA-VALID-01",
+  "customerId": "CUST-101",
+  "items": [
+    {
+      "sku": "WIDGET-A",
+      "quantity": 2,
+      "price": 45.00
+    },
+    {
+      "sku": "WIDGET-B",
+      "quantity": 1,
+      "price": 30.00
+    }
+  ]
+}

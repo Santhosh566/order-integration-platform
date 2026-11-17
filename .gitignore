@@ -1,0 +1,8 @@
+target/
+data/
+*.log
+.idea/
+.vscode/
+
+# Local settings with secrets (MinIO key); see README
+config/application.yml

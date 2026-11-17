@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<purchaseOrder>
+    <orderId>ORD-XML-SUPPLIER-01</orderId>
+    <customerId>CUST-100</customerId>
+    <items>
+        <item>
+            <sku>WIDGET-A</sku>
+            <quantity>2</quantity>
+            <price>48.00</price>
+        </item>
+        <item>
+            <sku>WIDGET-B</sku>
+            <quantity>1</quantity>
+            <price>32.00</price>
+        </item>
+    </items>
+</purchaseOrder>

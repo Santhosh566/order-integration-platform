@@ -1,0 +1,5571 @@
+{
+ "note": "Development catalogue: fictional brands; GST as revised Sept 2025, for demonstration only.",
+ "categories": [
+  {
+   "slug": "mobiles-tablets",
+   "name": "Mobiles & Tablets",
+   "parent": null,
+   "sortOrder": 10,
+   "colour": "#1c7ed6",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "smartphones",
+   "name": "Smartphones",
+   "parent": "mobiles-tablets",
+   "sortOrder": 10,
+   "colour": "#1c7ed6",
+   "gstRule": null,
+   "specKeys": [
+    "RAM",
+    "Storage",
+    "Display",
+    "Battery",
+    "Camera"
+   ]
+  },
+  {
+   "slug": "tablets",
+   "name": "Tablets",
+   "parent": "mobiles-tablets",
+   "sortOrder": 20,
+   "colour": "#1c7ed6",
+   "gstRule": null,
+   "specKeys": [
+    "Display",
+    "Storage",
+    "Battery",
+    "Connectivity"
+   ]
+  },
+  {
+   "slug": "mobile-accessories",
+   "name": "Mobile Accessories",
+   "parent": "mobiles-tablets",
+   "sortOrder": 30,
+   "colour": "#1c7ed6",
+   "gstRule": null,
+   "specKeys": [
+    "Type",
+    "Length / size",
+    "Compatibility"
+   ]
+  },
+  {
+   "slug": "power-banks",
+   "name": "Power Banks",
+   "parent": "mobiles-tablets",
+   "sortOrder": 40,
+   "colour": "#1c7ed6",
+   "gstRule": null,
+   "specKeys": [
+    "Capacity",
+    "Output",
+    "Ports",
+    "Weight"
+   ]
+  },
+  {
+   "slug": "computers",
+   "name": "Computers",
+   "parent": null,
+   "sortOrder": 20,
+   "colour": "#0ca678",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "laptops",
+   "name": "Laptops",
+   "parent": "computers",
+   "sortOrder": 10,
+   "colour": "#0ca678",
+   "gstRule": null,
+   "specKeys": [
+    "Processor",
+    "RAM",
+    "Storage",
+    "Display",
+    "Weight"
+   ]
+  },
+  {
+   "slug": "monitors",
+   "name": "Monitors",
+   "parent": "computers",
+   "sortOrder": 20,
+   "colour": "#0ca678",
+   "gstRule": null,
+   "specKeys": [
+    "Size",
+    "Resolution",
+    "Refresh rate",
+    "Panel"
+   ]
+  },
+  {
+   "slug": "keyboards-mice",
+   "name": "Keyboards & Mice",
+   "parent": "computers",
+   "sortOrder": 30,
+   "colour": "#0ca678",
+   "gstRule": null,
+   "specKeys": [
+    "Type",
+    "Connection",
+    "Battery",
+    "Layout"
+   ]
+  },
+  {
+   "slug": "storage",
+   "name": "Storage",
+   "parent": "computers",
+   "sortOrder": 40,
+   "colour": "#0ca678",
+   "gstRule": null,
+   "specKeys": [
+    "Capacity",
+    "Interface",
+    "Speed",
+    "Type"
+   ]
+  },
+  {
+   "slug": "tv-audio-wearables",
+   "name": "TV, Audio & Wearables",
+   "parent": null,
+   "sortOrder": 30,
+   "colour": "#7048e8",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "televisions",
+   "name": "Televisions",
+   "parent": "tv-audio-wearables",
+   "sortOrder": 10,
+   "colour": "#7048e8",
+   "gstRule": null,
+   "specKeys": [
+    "Screen",
+    "Resolution",
+    "Smart OS",
+    "Sound"
+   ]
+  },
+  {
+   "slug": "headphones",
+   "name": "Headphones",
+   "parent": "tv-audio-wearables",
+   "sortOrder": 20,
+   "colour": "#7048e8",
+   "gstRule": null,
+   "specKeys": [
+    "Type",
+    "Noise cancelling",
+    "Battery",
+    "Connection"
+   ]
+  },
+  {
+   "slug": "speakers",
+   "name": "Speakers",
+   "parent": "tv-audio-wearables",
+   "sortOrder": 30,
+   "colour": "#7048e8",
+   "gstRule": null,
+   "specKeys": [
+    "Output",
+    "Battery",
+    "Water resistance",
+    "Connection"
+   ]
+  },
+  {
+   "slug": "smartwatches",
+   "name": "Smartwatches",
+   "parent": "tv-audio-wearables",
+   "sortOrder": 40,
+   "colour": "#7048e8",
+   "gstRule": null,
+   "specKeys": [
+    "Display",
+    "Battery",
+    "Sensors",
+    "Water resistance"
+   ]
+  },
+  {
+   "slug": "home-appliances",
+   "name": "Home Appliances",
+   "parent": null,
+   "sortOrder": 40,
+   "colour": "#f08c00",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "air-conditioners",
+   "name": "Air Conditioners",
+   "parent": "home-appliances",
+   "sortOrder": 10,
+   "colour": "#f08c00",
+   "gstRule": null,
+   "specKeys": [
+    "Capacity",
+    "Star rating",
+    "Type",
+    "Copper condenser"
+   ]
+  },
+  {
+   "slug": "refrigerators",
+   "name": "Refrigerators",
+   "parent": "home-appliances",
+   "sortOrder": 20,
+   "colour": "#f08c00",
+   "gstRule": null,
+   "specKeys": [
+    "Capacity",
+    "Doors",
+    "Star rating",
+    "Inverter"
+   ]
+  },
+  {
+   "slug": "washing-machines",
+   "name": "Washing Machines",
+   "parent": "home-appliances",
+   "sortOrder": 30,
+   "colour": "#f08c00",
+   "gstRule": null,
+   "specKeys": [
+    "Capacity",
+    "Type",
+    "Star rating",
+    "Programs"
+   ]
+  },
+  {
+   "slug": "kitchen-appliances",
+   "name": "Kitchen Appliances",
+   "parent": "home-appliances",
+   "sortOrder": 40,
+   "colour": "#f08c00",
+   "gstRule": null,
+   "specKeys": [
+    "Power",
+    "Capacity",
+    "Type",
+    "Warranty"
+   ]
+  },
+  {
+   "slug": "home-kitchen",
+   "name": "Home & Kitchen",
+   "parent": null,
+   "sortOrder": 50,
+   "colour": "#e64980",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "cookware",
+   "name": "Cookware",
+   "parent": "home-kitchen",
+   "sortOrder": 10,
+   "colour": "#e64980",
+   "gstRule": null,
+   "specKeys": [
+    "Material",
+    "Pieces",
+    "Induction base",
+    "Dishwasher safe"
+   ]
+  },
+  {
+   "slug": "dinnerware",
+   "name": "Dinnerware",
+   "parent": "home-kitchen",
+   "sortOrder": 20,
+   "colour": "#e64980",
+   "gstRule": null,
+   "specKeys": [
+    "Material",
+    "Pieces",
+    "Microwave safe",
+    "Pattern"
+   ]
+  },
+  {
+   "slug": "storage-containers",
+   "name": "Storage & Containers",
+   "parent": "home-kitchen",
+   "sortOrder": 30,
+   "colour": "#e64980",
+   "gstRule": null,
+   "specKeys": [
+    "Material",
+    "Pieces",
+    "Capacity",
+    "Airtight"
+   ]
+  },
+  {
+   "slug": "home-decor",
+   "name": "Home Décor",
+   "parent": "home-kitchen",
+   "sortOrder": 40,
+   "colour": "#e64980",
+   "gstRule": null,
+   "specKeys": [
+    "Material",
+    "Size",
+    "Colour",
+    "Mounting"
+   ]
+  },
+  {
+   "slug": "furniture",
+   "name": "Furniture",
+   "parent": null,
+   "sortOrder": 60,
+   "colour": "#5c940d",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "office-chairs",
+   "name": "Office Chairs",
+   "parent": "furniture",
+   "sortOrder": 10,
+   "colour": "#5c940d",
+   "gstRule": null,
+   "specKeys": [
+    "Back",
+    "Adjustments",
+    "Max load",
+    "Warranty"
+   ]
+  },
+  {
+   "slug": "desks",
+   "name": "Desks",
+   "parent": "furniture",
+   "sortOrder": 20,
+   "colour": "#5c940d",
+   "gstRule": null,
+   "specKeys": [
+    "Size",
+    "Material",
+    "Height",
+    "Assembly"
+   ]
+  },
+  {
+   "slug": "sofas",
+   "name": "Sofas",
+   "parent": "furniture",
+   "sortOrder": 30,
+   "colour": "#5c940d",
+   "gstRule": null,
+   "specKeys": [
+    "Seats",
+    "Upholstery",
+    "Frame",
+    "Dimensions"
+   ]
+  },
+  {
+   "slug": "beds-mattresses",
+   "name": "Beds & Mattresses",
+   "parent": "furniture",
+   "sortOrder": 40,
+   "colour": "#5c940d",
+   "gstRule": null,
+   "specKeys": [
+    "Size",
+    "Material",
+    "Firmness",
+    "Thickness"
+   ]
+  },
+  {
+   "slug": "mens-fashion",
+   "name": "Men's Fashion",
+   "parent": null,
+   "sortOrder": 70,
+   "colour": "#1098ad",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "mens-t-shirts",
+   "name": "Men's T-shirts",
+   "parent": "mens-fashion",
+   "sortOrder": 10,
+   "colour": "#1098ad",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Fabric",
+    "Fit",
+    "Sleeve",
+    "Sizes"
+   ]
+  },
+  {
+   "slug": "mens-shirts",
+   "name": "Men's Shirts",
+   "parent": "mens-fashion",
+   "sortOrder": 20,
+   "colour": "#1098ad",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Fabric",
+    "Fit",
+    "Sleeve",
+    "Occasion"
+   ]
+  },
+  {
+   "slug": "mens-jeans",
+   "name": "Men's Jeans",
+   "parent": "mens-fashion",
+   "sortOrder": 30,
+   "colour": "#1098ad",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Fabric",
+    "Fit",
+    "Rise",
+    "Sizes"
+   ]
+  },
+  {
+   "slug": "mens-footwear",
+   "name": "Men's Footwear",
+   "parent": "mens-fashion",
+   "sortOrder": 40,
+   "colour": "#1098ad",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Type",
+    "Upper",
+    "Sole",
+    "Sizes"
+   ]
+  },
+  {
+   "slug": "womens-fashion",
+   "name": "Women's Fashion",
+   "parent": null,
+   "sortOrder": 80,
+   "colour": "#d6336c",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "kurtas",
+   "name": "Kurtas",
+   "parent": "womens-fashion",
+   "sortOrder": 10,
+   "colour": "#d6336c",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Fabric",
+    "Length",
+    "Sleeve",
+    "Sizes"
+   ]
+  },
+  {
+   "slug": "sarees",
+   "name": "Sarees",
+   "parent": "womens-fashion",
+   "sortOrder": 20,
+   "colour": "#d6336c",
+   "gstRule": null,
+   "specKeys": [
+    "Fabric",
+    "Length",
+    "Blouse piece",
+    "Work"
+   ]
+  },
+  {
+   "slug": "womens-tops",
+   "name": "Women's Tops",
+   "parent": "womens-fashion",
+   "sortOrder": 30,
+   "colour": "#d6336c",
+   "gstRule": "APPAREL_2500",
+   "specKeys": [
+    "Fabric",
+    "Fit",
+    "Sleeve",
+    "Sizes"
+   ]
+  },
+  {
+   "slug": "handbags",
+   "name": "Handbags",
+   "parent": "womens-fashion",
+   "sortOrder": 40,
+   "colour": "#d6336c",
+   "gstRule": null,
+   "specKeys": [
+    "Material",
+    "Size",
+    "Closure",
+    "Compartments"
+   ]
+  },
+  {
+   "slug": "beauty-personal-care",
+   "name": "Beauty & Personal Care",
+   "parent": null,
+   "sortOrder": 90,
+   "colour": "#ae3ec9",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "skincare",
+   "name": "Skincare",
+   "parent": "beauty-personal-care",
+   "sortOrder": 10,
+   "colour": "#ae3ec9",
+   "gstRule": null,
+   "specKeys": [
+    "Skin type",
+    "Quantity",
+    "Key ingredient",
+    "Fragrance"
+   ]
+  },
+  {
+   "slug": "haircare",
+   "name": "Haircare",
+   "parent": "beauty-personal-care",
+   "sortOrder": 20,
+   "colour": "#ae3ec9",
+   "gstRule": null,
+   "specKeys": [
+    "Hair type",
+    "Quantity",
+    "Key ingredient",
+    "Sulphate free"
+   ]
+  },
+  {
+   "slug": "fragrances",
+   "name": "Fragrances",
+   "parent": "beauty-personal-care",
+   "sortOrder": 30,
+   "colour": "#ae3ec9",
+   "gstRule": null,
+   "specKeys": [
+    "Type",
+    "Quantity",
+    "Notes",
+    "Longevity"
+   ]
+  },
+  {
+   "slug": "grooming",
+   "name": "Grooming",
+   "parent": "beauty-personal-care",
+   "sortOrder": 40,
+   "colour": "#ae3ec9",
+   "gstRule": null,
+   "specKeys": [
+    "Type",
+    "Battery",
+    "Attachments",
+    "Waterproof"
+   ]
+  },
+  {
+   "slug": "grocery",
+   "name": "Grocery",
+   "parent": null,
+   "sortOrder": 100,
+   "colour": "#2f9e44",
+   "gstRule": null,
+   "specKeys": []
+  },
+  {
+   "slug": "staples",
+   "name": "Staples",
+   "parent": "grocery",
+   "sortOrder": 10,
+   "colour": "#2f9e44",
+   "gstRule": null,
+   "specKeys": [
+    "Pack size",
+    "Type",
+    "Organic",
+    "Shelf life"
+   ]
+  },
+  {
+   "slug": "snacks",
+   "name": "Snacks",
+   "parent": "grocery",
+   "sortOrder": 20,
+   "colour": "#2f9e44",
+   "gstRule": null,
+   "specKeys": [
+    "Pack size",
+    "Type",
+    "Vegetarian",
+    "Shelf life"
+   ]
+  },
+  {
+   "slug": "beverages",
+   "name": "Beverages",
+   "parent": "grocery",
+   "sortOrder": 30,
+   "colour": "#2f9e44",
+   "gstRule": null,
+   "specKeys": [
+    "Pack size",
+    "Type",
+    "Caffeine",
+    "Origin"
+   ]
+  },
+  {
+   "slug": "dry-fruits",
+   "name": "Dry Fruits",
+   "parent": "grocery",
+   "sortOrder": 40,
+   "colour": "#2f9e44",
+   "gstRule": null,
+   "specKeys": [
+    "Pack size",
+    "Type",
+    "Grade",
+    "Origin"
+   ]
+  }
+ ],
+ "products": [
+  {
+   "sku": "S-VOLT-0100",
+   "name": "Voltix Nova 5G",
+   "brand": "Voltix",
+   "category": "smartphones",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 18999,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "A 5G phone with a bright 120 Hz AMOLED screen and a two-day battery.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "RAM",
+     "value": "8 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "128 GB"
+    },
+    {
+     "name": "Display",
+     "value": "6.6\" AMOLED, 120 Hz"
+    },
+    {
+     "name": "Battery",
+     "value": "5000 mAh"
+    },
+    {
+     "name": "Camera",
+     "value": "50 MP + 8 MP"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KAIR-0200",
+   "name": "Kairo Edge Pro",
+   "brand": "Kairo",
+   "category": "smartphones",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 34999,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Flagship camera, fast charging at 80 W and an aluminium frame.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "RAM",
+     "value": "12 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "256 GB"
+    },
+    {
+     "name": "Display",
+     "value": "6.7\" AMOLED, 144 Hz"
+    },
+    {
+     "name": "Battery",
+     "value": "4800 mAh"
+    },
+    {
+     "name": "Camera",
+     "value": "108 MP + 12 MP + 5 MP"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "S-VOLT-0300",
+   "name": "Voltix Lite 4G",
+   "brand": "Voltix",
+   "category": "smartphones",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 8999,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Everyday phone with a big battery at a small price.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "RAM",
+     "value": "4 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "64 GB"
+    },
+    {
+     "name": "Display",
+     "value": "6.5\" LCD, 90 Hz"
+    },
+    {
+     "name": "Battery",
+     "value": "5000 mAh"
+    },
+    {
+     "name": "Camera",
+     "value": "13 MP"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ZENP-0400",
+   "name": "Zenpho Fold Mini",
+   "brand": "Zenpho",
+   "category": "smartphones",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 64999,
+   "stock": 4,
+   "reorderLevel": 1,
+   "description": "Folds to pocket size; opens to a full screen.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "RAM",
+     "value": "12 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "512 GB"
+    },
+    {
+     "name": "Display",
+     "value": "6.9\" foldable AMOLED"
+    },
+    {
+     "name": "Battery",
+     "value": "4400 mAh"
+    },
+    {
+     "name": "Camera",
+     "value": "50 MP + 12 MP"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "T-KAIR-0110",
+   "name": "Kairo Tab 11",
+   "brand": "Kairo",
+   "category": "tablets",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 21999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "An 11-inch tablet for study, streaming and notes.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "11\" 2K LCD"
+    },
+    {
+     "name": "Storage",
+     "value": "128 GB"
+    },
+    {
+     "name": "Battery",
+     "value": "8000 mAh"
+    },
+    {
+     "name": "Connectivity",
+     "value": "Wi-Fi"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "T-VOLT-0210",
+   "name": "Voltix Pad Kids",
+   "brand": "Voltix",
+   "category": "tablets",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 9999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Sturdy tablet with a parental-control mode and a bumper case.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "8\" HD"
+    },
+    {
+     "name": "Storage",
+     "value": "32 GB"
+    },
+    {
+     "name": "Battery",
+     "value": "5100 mAh"
+    },
+    {
+     "name": "Connectivity",
+     "value": "Wi-Fi"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "T-ZENP-0310",
+   "name": "Zenpho Tab Pro 12.4",
+   "brand": "Zenpho",
+   "category": "tablets",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 54999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "Large AMOLED tablet with a stylus in the box.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "12.4\" AMOLED"
+    },
+    {
+     "name": "Storage",
+     "value": "256 GB"
+    },
+    {
+     "name": "Battery",
+     "value": "10090 mAh"
+    },
+    {
+     "name": "Connectivity",
+     "value": "Wi-Fi + 5G"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "T-KAIR-0410",
+   "name": "Kairo Tab 8 LTE",
+   "brand": "Kairo",
+   "category": "tablets",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 13999,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Compact tablet with calling and 4G data.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "8.7\" LCD"
+    },
+    {
+     "name": "Storage",
+     "value": "64 GB"
+    },
+    {
+     "name": "Battery",
+     "value": "5100 mAh"
+    },
+    {
+     "name": "Connectivity",
+     "value": "Wi-Fi + 4G"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MA-LINK-0120",
+   "name": "Linkr Braided USB-C Cable",
+   "brand": "Linkr",
+   "category": "mobile-accessories",
+   "hsn": "8544",
+   "gstRate": 18,
+   "price": 499,
+   "stock": 200,
+   "reorderLevel": 10,
+   "description": "Nylon-braided cable rated for 60 W charging.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Cable"
+    },
+    {
+     "name": "Length / size",
+     "value": "1.5 m"
+    },
+    {
+     "name": "Compatibility",
+     "value": "USB-C devices"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MA-LINK-0220",
+   "name": "Linkr 33 W Fast Charger",
+   "brand": "Linkr",
+   "category": "mobile-accessories",
+   "hsn": "8544",
+   "gstRate": 18,
+   "price": 1199,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Charges most phones to 50% in about 30 minutes.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Wall charger"
+    },
+    {
+     "name": "Length / size",
+     "value": "Compact"
+    },
+    {
+     "name": "Compatibility",
+     "value": "USB-C, PD 3.0"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MA-SHIE-0320",
+   "name": "Shieldz Tempered Glass (2-pack)",
+   "brand": "Shieldz",
+   "category": "mobile-accessories",
+   "hsn": "8544",
+   "gstRate": 18,
+   "price": 399,
+   "stock": 300,
+   "reorderLevel": 10,
+   "description": "9H hardness, edge-to-edge, bubble-free fitting.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Screen guard"
+    },
+    {
+     "name": "Length / size",
+     "value": "6.6\""
+    },
+    {
+     "name": "Compatibility",
+     "value": "Voltix Nova 5G"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MA-SHIE-0420",
+   "name": "Shieldz Clear Case",
+   "brand": "Shieldz",
+   "category": "mobile-accessories",
+   "hsn": "8544",
+   "gstRate": 18,
+   "price": 599,
+   "stock": 150,
+   "reorderLevel": 10,
+   "description": "Shock-absorbing corners that stay clear.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Back cover"
+    },
+    {
+     "name": "Length / size",
+     "value": "6.7\""
+    },
+    {
+     "name": "Compatibility",
+     "value": "Kairo Edge Pro"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "PB-LINK-0130",
+   "name": "Linkr 10000 mAh Slim",
+   "brand": "Linkr",
+   "category": "power-banks",
+   "hsn": "8507",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Pocket-sized power bank that charges a phone about twice.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "10000 mAh"
+    },
+    {
+     "name": "Output",
+     "value": "22.5 W"
+    },
+    {
+     "name": "Ports",
+     "value": "USB-C + USB-A"
+    },
+    {
+     "name": "Weight",
+     "value": "210 g"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "PB-LINK-0230",
+   "name": "Linkr 20000 mAh Pro",
+   "brand": "Linkr",
+   "category": "power-banks",
+   "hsn": "8507",
+   "gstRate": 18,
+   "price": 2199,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Can charge a laptop as well as phones.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "20000 mAh"
+    },
+    {
+     "name": "Output",
+     "value": "65 W"
+    },
+    {
+     "name": "Ports",
+     "value": "2 × USB-C + USB-A"
+    },
+    {
+     "name": "Weight",
+     "value": "420 g"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "PB-VOLT-0330",
+   "name": "Voltix MagPower 5000",
+   "brand": "Voltix",
+   "category": "power-banks",
+   "hsn": "8507",
+   "gstRate": 18,
+   "price": 1799,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Magnetic wireless pack that snaps onto the back of a phone.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "5000 mAh"
+    },
+    {
+     "name": "Output",
+     "value": "15 W wireless"
+    },
+    {
+     "name": "Ports",
+     "value": "USB-C"
+    },
+    {
+     "name": "Weight",
+     "value": "130 g"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "PB-KAIR-0430",
+   "name": "Kairo Solar 25000",
+   "brand": "Kairo",
+   "category": "power-banks",
+   "hsn": "8507",
+   "gstRate": 18,
+   "price": 2899,
+   "stock": 0,
+   "reorderLevel": 1,
+   "description": "Rugged pack with a solar panel and torch for trips.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "25000 mAh"
+    },
+    {
+     "name": "Output",
+     "value": "18 W"
+    },
+    {
+     "name": "Ports",
+     "value": "2 × USB-A + USB-C"
+    },
+    {
+     "name": "Weight",
+     "value": "560 g"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "L-KAIR-0101",
+   "name": "Kairo Book 14",
+   "brand": "Kairo",
+   "category": "laptops",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 54999,
+   "stock": 18,
+   "reorderLevel": 1,
+   "description": "Thin, light laptop for work and study, 12-hour battery.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Processor",
+     "value": "8-core, 4.4 GHz"
+    },
+    {
+     "name": "RAM",
+     "value": "16 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "512 GB SSD"
+    },
+    {
+     "name": "Display",
+     "value": "14\" 2.2K"
+    },
+    {
+     "name": "Weight",
+     "value": "1.4 kg"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "L-VOLT-0201",
+   "name": "Voltix Gamer 16",
+   "brand": "Voltix",
+   "category": "laptops",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 104999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "High-refresh gaming laptop with a cool-running chassis.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Processor",
+     "value": "14-core, 5.0 GHz + RTX graphics"
+    },
+    {
+     "name": "RAM",
+     "value": "32 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "1 TB SSD"
+    },
+    {
+     "name": "Display",
+     "value": "16\" 165 Hz"
+    },
+    {
+     "name": "Weight",
+     "value": "2.3 kg"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "L-ZENP-0301",
+   "name": "Zenpho Air 13",
+   "brand": "Zenpho",
+   "category": "laptops",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 79999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "OLED ultrabook with an all-day battery.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Processor",
+     "value": "10-core"
+    },
+    {
+     "name": "RAM",
+     "value": "16 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "512 GB SSD"
+    },
+    {
+     "name": "Display",
+     "value": "13.6\" OLED"
+    },
+    {
+     "name": "Weight",
+     "value": "1.2 kg"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "L-KAIR-0401",
+   "name": "Kairo Book 15 Essential",
+   "brand": "Kairo",
+   "category": "laptops",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 38999,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Dependable laptop for home and office.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Processor",
+     "value": "6-core, 4.1 GHz"
+    },
+    {
+     "name": "RAM",
+     "value": "8 GB"
+    },
+    {
+     "name": "Storage",
+     "value": "512 GB SSD"
+    },
+    {
+     "name": "Display",
+     "value": "15.6\" FHD"
+    },
+    {
+     "name": "Weight",
+     "value": "1.7 kg"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "M-KAIR-0111",
+   "name": "Kairo View 24",
+   "brand": "Kairo",
+   "category": "monitors",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 9999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Slim-bezel office monitor with an eye-care mode.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "24\""
+    },
+    {
+     "name": "Resolution",
+     "value": "1920 × 1080"
+    },
+    {
+     "name": "Refresh rate",
+     "value": "75 Hz"
+    },
+    {
+     "name": "Panel",
+     "value": "IPS"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "M-VOLT-0211",
+   "name": "Voltix Arena 27Q",
+   "brand": "Voltix",
+   "category": "monitors",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 24999,
+   "stock": 12,
+   "reorderLevel": 1,
+   "description": "Fast QHD monitor for gaming.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "27\""
+    },
+    {
+     "name": "Resolution",
+     "value": "2560 × 1440"
+    },
+    {
+     "name": "Refresh rate",
+     "value": "165 Hz"
+    },
+    {
+     "name": "Panel",
+     "value": "IPS"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "M-ZENP-0311",
+   "name": "Zenpho Studio 32 4K",
+   "brand": "Zenpho",
+   "category": "monitors",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 44999,
+   "stock": 5,
+   "reorderLevel": 1,
+   "description": "Colour-accurate 4K screen for design and photos.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "32\""
+    },
+    {
+     "name": "Resolution",
+     "value": "3840 × 2160"
+    },
+    {
+     "name": "Refresh rate",
+     "value": "60 Hz"
+    },
+    {
+     "name": "Panel",
+     "value": "IPS, 99% sRGB"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "M-KAIR-0411",
+   "name": "Kairo Curve 34",
+   "brand": "Kairo",
+   "category": "monitors",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 36999,
+   "stock": 0,
+   "reorderLevel": 1,
+   "description": "Ultrawide curved monitor for multitasking.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "34\" curved"
+    },
+    {
+     "name": "Resolution",
+     "value": "3440 × 1440"
+    },
+    {
+     "name": "Refresh rate",
+     "value": "100 Hz"
+    },
+    {
+     "name": "Panel",
+     "value": "VA"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "KM-TYPR-0121",
+   "name": "Typro K2 Mechanical Keyboard",
+   "brand": "Typro",
+   "category": "keyboards-mice",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 3499,
+   "stock": 45,
+   "reorderLevel": 4,
+   "description": "Hot-swappable mechanical keyboard.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Mechanical, brown switches"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth + USB-C"
+    },
+    {
+     "name": "Battery",
+     "value": "4000 mAh"
+    },
+    {
+     "name": "Layout",
+     "value": "75%"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KM-TYPR-0221",
+   "name": "Typro Silent Mouse",
+   "brand": "Typro",
+   "category": "keyboards-mice",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 699,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Quiet clicks for shared offices.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Silent click mouse"
+    },
+    {
+     "name": "Connection",
+     "value": "2.4 GHz wireless"
+    },
+    {
+     "name": "Battery",
+     "value": "AA, 12 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KM-VOLT-0321",
+   "name": "Voltix Strike Gaming Mouse",
+   "brand": "Voltix",
+   "category": "keyboards-mice",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 1999,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Light 59 g gaming mouse with an accurate sensor.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Gaming mouse, 26000 DPI"
+    },
+    {
+     "name": "Connection",
+     "value": "USB"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KM-TYPR-0421",
+   "name": "Typro Combo Wireless",
+   "brand": "Typro",
+   "category": "keyboards-mice",
+   "hsn": "8471",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Keyboard and mouse that share one receiver.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Keyboard + mouse"
+    },
+    {
+     "name": "Connection",
+     "value": "2.4 GHz wireless"
+    },
+    {
+     "name": "Battery",
+     "value": "AAA"
+    },
+    {
+     "name": "Layout",
+     "value": "Full size"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-STOR-0131",
+   "name": "Storix 1 TB Portable SSD",
+   "brand": "Storix",
+   "category": "storage",
+   "hsn": "8523",
+   "gstRate": 18,
+   "price": 6999,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Pocket SSD with drop protection.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "1 TB"
+    },
+    {
+     "name": "Interface",
+     "value": "USB-C 3.2"
+    },
+    {
+     "name": "Speed",
+     "value": "1050 MB/s"
+    },
+    {
+     "name": "Type",
+     "value": "SSD"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-STOR-0231",
+   "name": "Storix 2 TB Hard Drive",
+   "brand": "Storix",
+   "category": "storage",
+   "hsn": "8523",
+   "gstRate": 18,
+   "price": 5499,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Backup drive for photos and documents.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "2 TB"
+    },
+    {
+     "name": "Interface",
+     "value": "USB 3.0"
+    },
+    {
+     "name": "Type",
+     "value": "HDD"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-STOR-0331",
+   "name": "Storix 128 GB Pen Drive",
+   "brand": "Storix",
+   "category": "storage",
+   "hsn": "8523",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 200,
+   "reorderLevel": 10,
+   "description": "Metal pen drive with a key ring.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "128 GB"
+    },
+    {
+     "name": "Interface",
+     "value": "USB 3.1"
+    },
+    {
+     "name": "Speed",
+     "value": "150 MB/s"
+    },
+    {
+     "name": "Type",
+     "value": "Flash"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-STOR-0431",
+   "name": "Storix NVMe 1 TB",
+   "brand": "Storix",
+   "category": "storage",
+   "hsn": "8523",
+   "gstRate": 18,
+   "price": 5999,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Fast internal SSD for upgrades.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "1 TB"
+    },
+    {
+     "name": "Interface",
+     "value": "PCIe 4.0 NVMe"
+    },
+    {
+     "name": "Speed",
+     "value": "7000 MB/s"
+    },
+    {
+     "name": "Type",
+     "value": "Internal SSD"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "T-ZENP-0102",
+   "name": "Zenpho 43\" 4K Smart TV",
+   "brand": "Zenpho",
+   "category": "televisions",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 27999,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "4K smart TV with voice remote.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Screen",
+     "value": "43\""
+    },
+    {
+     "name": "Resolution",
+     "value": "4K UHD"
+    },
+    {
+     "name": "Smart OS",
+     "value": "Android TV"
+    },
+    {
+     "name": "Sound",
+     "value": "20 W"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "T-KAIR-0202",
+   "name": "Kairo 32\" HD Smart TV",
+   "brand": "Kairo",
+   "category": "televisions",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 12999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Compact smart TV for bedrooms.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Screen",
+     "value": "32\""
+    },
+    {
+     "name": "Resolution",
+     "value": "HD Ready"
+    },
+    {
+     "name": "Smart OS",
+     "value": "Linux smart"
+    },
+    {
+     "name": "Sound",
+     "value": "20 W"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "T-ZENP-0302",
+   "name": "Zenpho 55\" QLED",
+   "brand": "Zenpho",
+   "category": "televisions",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 49999,
+   "stock": 8,
+   "reorderLevel": 1,
+   "description": "Bright QLED picture with Dolby Atmos sound.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Screen",
+     "value": "55\""
+    },
+    {
+     "name": "Resolution",
+     "value": "4K QLED"
+    },
+    {
+     "name": "Smart OS",
+     "value": "Google TV"
+    },
+    {
+     "name": "Sound",
+     "value": "40 W Dolby Atmos"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "T-KAIR-0402",
+   "name": "Kairo 65\" 4K Pro",
+   "brand": "Kairo",
+   "category": "televisions",
+   "hsn": "8528",
+   "gstRate": 18,
+   "price": 69999,
+   "stock": 3,
+   "reorderLevel": 1,
+   "description": "Big-screen TV with a 120 Hz panel for sport.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Screen",
+     "value": "65\""
+    },
+    {
+     "name": "Resolution",
+     "value": "4K UHD, 120 Hz"
+    },
+    {
+     "name": "Smart OS",
+     "value": "Google TV"
+    },
+    {
+     "name": "Sound",
+     "value": "50 W"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "H-SONI-0112",
+   "name": "Sonix Buds Air",
+   "brand": "Sonix",
+   "category": "headphones",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 1999,
+   "stock": 150,
+   "reorderLevel": 10,
+   "description": "Light earbuds with clear calls.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "True wireless earbuds"
+    },
+    {
+     "name": "Noise cancelling",
+     "value": "ENC calls"
+    },
+    {
+     "name": "Battery",
+     "value": "30 h with case"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth 5.3"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-SONI-0212",
+   "name": "Sonix Over-Ear ANC",
+   "brand": "Sonix",
+   "category": "headphones",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 7999,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Comfortable headphones that silence travel noise.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Over-ear"
+    },
+    {
+     "name": "Noise cancelling",
+     "value": "Active noise cancelling"
+    },
+    {
+     "name": "Battery",
+     "value": "40 h"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth + 3.5 mm"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-VOLT-0312",
+   "name": "Voltix Neckband Pro",
+   "brand": "Voltix",
+   "category": "headphones",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Magnetic earbuds on a light neckband.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Neckband"
+    },
+    {
+     "name": "Battery",
+     "value": "25 h"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth 5.2"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-SONI-0412",
+   "name": "Sonix Studio Wired",
+   "brand": "Sonix",
+   "category": "headphones",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Flat-response headphones for music production.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Over-ear, wired"
+    },
+    {
+     "name": "Connection",
+     "value": "3.5 mm / 6.3 mm"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-SONI-0122",
+   "name": "Sonix Boom Mini",
+   "brand": "Sonix",
+   "category": "speakers",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 1799,
+   "stock": 70,
+   "reorderLevel": 7,
+   "description": "Small speaker that survives the pool.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Output",
+     "value": "10 W"
+    },
+    {
+     "name": "Battery",
+     "value": "12 h"
+    },
+    {
+     "name": "Water resistance",
+     "value": "IPX7"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-SONI-0222",
+   "name": "Sonix Party 80",
+   "brand": "Sonix",
+   "category": "speakers",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 8999,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Party speaker with lights and a microphone.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Output",
+     "value": "80 W"
+    },
+    {
+     "name": "Battery",
+     "value": "15 h, RGB lights"
+    },
+    {
+     "name": "Water resistance",
+     "value": "IPX4"
+    },
+    {
+     "name": "Connection",
+     "value": "Bluetooth + Karaoke mic"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ZENP-0322",
+   "name": "Zenpho Soundbar 2.1",
+   "brand": "Zenpho",
+   "category": "speakers",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 11999,
+   "stock": 12,
+   "reorderLevel": 1,
+   "description": "Soundbar with a wireless subwoofer.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Output",
+     "value": "160 W"
+    },
+    {
+     "name": "Battery",
+     "value": "Mains powered"
+    },
+    {
+     "name": "Connection",
+     "value": "HDMI ARC + Bluetooth"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KAIR-0422",
+   "name": "Kairo Smart Speaker",
+   "brand": "Kairo",
+   "category": "speakers",
+   "hsn": "8518",
+   "gstRate": 18,
+   "price": 3499,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Voice-controlled speaker for the home.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Output",
+     "value": "5 W"
+    },
+    {
+     "name": "Battery",
+     "value": "Mains powered"
+    },
+    {
+     "name": "Connection",
+     "value": "Wi-Fi, voice assistant"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-VOLT-0132",
+   "name": "Voltix Fit Watch 3",
+   "brand": "Voltix",
+   "category": "smartwatches",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Fitness watch with Bluetooth calling.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "1.9\" AMOLED"
+    },
+    {
+     "name": "Battery",
+     "value": "10 days"
+    },
+    {
+     "name": "Sensors",
+     "value": "Heart rate, SpO2"
+    },
+    {
+     "name": "Water resistance",
+     "value": "IP68"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KAIR-0232",
+   "name": "Kairo Watch GT",
+   "brand": "Kairo",
+   "category": "smartwatches",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 8999,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "GPS sports watch with a steel case.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "1.43\" AMOLED"
+    },
+    {
+     "name": "Battery",
+     "value": "14 days"
+    },
+    {
+     "name": "Sensors",
+     "value": "GPS, heart rate, SpO2"
+    },
+    {
+     "name": "Water resistance",
+     "value": "5 ATM"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ZENP-0332",
+   "name": "Zenpho Watch Classic",
+   "brand": "Zenpho",
+   "category": "smartwatches",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 15999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Smartwatch with a classic leather strap.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "1.3\" AMOLED"
+    },
+    {
+     "name": "Battery",
+     "value": "7 days"
+    },
+    {
+     "name": "Sensors",
+     "value": "ECG, heart rate"
+    },
+    {
+     "name": "Water resistance",
+     "value": "5 ATM"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-VOLT-0432",
+   "name": "Voltix Band 7",
+   "brand": "Voltix",
+   "category": "smartwatches",
+   "hsn": "8517",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 100,
+   "reorderLevel": 10,
+   "description": "Slim fitness band for steps and sleep.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Display",
+     "value": "1.6\" AMOLED"
+    },
+    {
+     "name": "Battery",
+     "value": "14 days"
+    },
+    {
+     "name": "Sensors",
+     "value": "Heart rate"
+    },
+    {
+     "name": "Water resistance",
+     "value": "5 ATM"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "AC-COOL-0103",
+   "name": "Coolwave 1.5 T Inverter Split AC",
+   "brand": "Coolwave",
+   "category": "air-conditioners",
+   "hsn": "8415",
+   "gstRate": 18,
+   "price": 36999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Efficient inverter AC that cools at 52 °C outside.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "1.5 ton"
+    },
+    {
+     "name": "Star rating",
+     "value": "5 star"
+    },
+    {
+     "name": "Type",
+     "value": "Split, inverter"
+    },
+    {
+     "name": "Copper condenser",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "AC-COOL-0203",
+   "name": "Coolwave 1 T Window AC",
+   "brand": "Coolwave",
+   "category": "air-conditioners",
+   "hsn": "8415",
+   "gstRate": 18,
+   "price": 24999,
+   "stock": 8,
+   "reorderLevel": 1,
+   "description": "Simple window AC for small rooms.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "1 ton"
+    },
+    {
+     "name": "Star rating",
+     "value": "3 star"
+    },
+    {
+     "name": "Type",
+     "value": "Window"
+    },
+    {
+     "name": "Copper condenser",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "AC-ARCT-0303",
+   "name": "Arctiq 2 T Inverter Split AC",
+   "brand": "Arctiq",
+   "category": "air-conditioners",
+   "hsn": "8415",
+   "gstRate": 18,
+   "price": 49999,
+   "stock": 4,
+   "reorderLevel": 1,
+   "description": "For large living rooms, with Wi-Fi control.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "2 ton"
+    },
+    {
+     "name": "Star rating",
+     "value": "3 star"
+    },
+    {
+     "name": "Type",
+     "value": "Split, inverter"
+    },
+    {
+     "name": "Copper condenser",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "AC-ARCT-0403",
+   "name": "Arctiq Portable AC 1 T",
+   "brand": "Arctiq",
+   "category": "air-conditioners",
+   "hsn": "8415",
+   "gstRate": 18,
+   "price": 29999,
+   "stock": 0,
+   "reorderLevel": 1,
+   "description": "Moves between rooms; no outdoor unit.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "1 ton"
+    },
+    {
+     "name": "Type",
+     "value": "Portable"
+    },
+    {
+     "name": "Copper condenser",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "R-ARCT-0113",
+   "name": "Arctiq 253 L Frost Free",
+   "brand": "Arctiq",
+   "category": "refrigerators",
+   "hsn": "8418",
+   "gstRate": 18,
+   "price": 25999,
+   "stock": 12,
+   "reorderLevel": 1,
+   "description": "Frost-free fridge for a family of three.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "253 L"
+    },
+    {
+     "name": "Doors",
+     "value": "Double door"
+    },
+    {
+     "name": "Star rating",
+     "value": "3 star"
+    },
+    {
+     "name": "Inverter",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "R-COOL-0213",
+   "name": "Coolwave 190 L Direct Cool",
+   "brand": "Coolwave",
+   "category": "refrigerators",
+   "hsn": "8418",
+   "gstRate": 18,
+   "price": 13999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "Single-door fridge with a stabiliser-free range.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "190 L"
+    },
+    {
+     "name": "Doors",
+     "value": "Single door"
+    },
+    {
+     "name": "Star rating",
+     "value": "4 star"
+    },
+    {
+     "name": "Inverter",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "R-ARCT-0313",
+   "name": "Arctiq 580 L Side-by-Side",
+   "brand": "Arctiq",
+   "category": "refrigerators",
+   "hsn": "8418",
+   "gstRate": 18,
+   "price": 69999,
+   "stock": 3,
+   "reorderLevel": 1,
+   "description": "Large side-by-side fridge with a water dispenser.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "580 L"
+    },
+    {
+     "name": "Doors",
+     "value": "Side by side"
+    },
+    {
+     "name": "Inverter",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "R-COOL-0413",
+   "name": "Coolwave 350 L Convertible",
+   "brand": "Coolwave",
+   "category": "refrigerators",
+   "hsn": "8418",
+   "gstRate": 18,
+   "price": 36999,
+   "stock": 7,
+   "reorderLevel": 1,
+   "description": "Freezer converts to a fridge when you need space.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "350 L"
+    },
+    {
+     "name": "Doors",
+     "value": "Double door, convertible"
+    },
+    {
+     "name": "Star rating",
+     "value": "3 star"
+    },
+    {
+     "name": "Inverter",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "WM-WASH-0123",
+   "name": "Washly 7 kg Front Load",
+   "brand": "Washly",
+   "category": "washing-machines",
+   "hsn": "8450",
+   "gstRate": 18,
+   "price": 29999,
+   "stock": 9,
+   "reorderLevel": 1,
+   "description": "Gentle front loader with in-built heater.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "7 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Front load"
+    },
+    {
+     "name": "Star rating",
+     "value": "5 star"
+    },
+    {
+     "name": "Programs",
+     "value": "15"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "WM-WASH-0223",
+   "name": "Washly 8 kg Top Load",
+   "brand": "Washly",
+   "category": "washing-machines",
+   "hsn": "8450",
+   "gstRate": 18,
+   "price": 19999,
+   "stock": 14,
+   "reorderLevel": 1,
+   "description": "Fully automatic top loader with a soak mode.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "8 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Top load, fully automatic"
+    },
+    {
+     "name": "Star rating",
+     "value": "5 star"
+    },
+    {
+     "name": "Programs",
+     "value": "10"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WM-COOL-0323",
+   "name": "Coolwave 7.5 kg Semi Automatic",
+   "brand": "Coolwave",
+   "category": "washing-machines",
+   "hsn": "8450",
+   "gstRate": 18,
+   "price": 10999,
+   "stock": 22,
+   "reorderLevel": 2,
+   "description": "Twin-tub machine that saves water.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "7.5 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Semi automatic"
+    },
+    {
+     "name": "Star rating",
+     "value": "5 star"
+    },
+    {
+     "name": "Programs",
+     "value": "3"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WM-WASH-0423",
+   "name": "Washly 10 kg Washer Dryer",
+   "brand": "Washly",
+   "category": "washing-machines",
+   "hsn": "8450",
+   "gstRate": 18,
+   "price": 49999,
+   "stock": 3,
+   "reorderLevel": 1,
+   "description": "Washes and dries in one go.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Capacity",
+     "value": "10 kg wash / 6 kg dry"
+    },
+    {
+     "name": "Type",
+     "value": "Front load"
+    },
+    {
+     "name": "Star rating",
+     "value": "5 star"
+    },
+    {
+     "name": "Programs",
+     "value": "16"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "KA-CHEF-0133",
+   "name": "Chefora Mixer Grinder 750 W",
+   "brand": "Chefora",
+   "category": "kitchen-appliances",
+   "hsn": "8509",
+   "gstRate": 18,
+   "price": 3999,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Grinds idli batter, chutneys and masalas.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Power",
+     "value": "750 W"
+    },
+    {
+     "name": "Capacity",
+     "value": "3 jars"
+    },
+    {
+     "name": "Type",
+     "value": "Mixer grinder"
+    },
+    {
+     "name": "Warranty",
+     "value": "2 years"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KA-CHEF-0233",
+   "name": "Chefora Air Fryer 4.2 L",
+   "brand": "Chefora",
+   "category": "kitchen-appliances",
+   "hsn": "8509",
+   "gstRate": 18,
+   "price": 5999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Crisp food with a spoon of oil.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Power",
+     "value": "1500 W"
+    },
+    {
+     "name": "Capacity",
+     "value": "4.2 L"
+    },
+    {
+     "name": "Type",
+     "value": "Air fryer"
+    },
+    {
+     "name": "Warranty",
+     "value": "1 year"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KA-BREW-0333",
+   "name": "Brewly Electric Kettle 1.5 L",
+   "brand": "Brewly",
+   "category": "kitchen-appliances",
+   "hsn": "8509",
+   "gstRate": 18,
+   "price": 1199,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Boils water in three minutes; auto shut-off.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Power",
+     "value": "1500 W"
+    },
+    {
+     "name": "Capacity",
+     "value": "1.5 L"
+    },
+    {
+     "name": "Type",
+     "value": "Kettle"
+    },
+    {
+     "name": "Warranty",
+     "value": "1 year"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "KA-CHEF-0433",
+   "name": "Chefora Induction Cooktop",
+   "brand": "Chefora",
+   "category": "kitchen-appliances",
+   "hsn": "8509",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 45,
+   "reorderLevel": 4,
+   "description": "Eight preset Indian menus and a timer.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Power",
+     "value": "2000 W"
+    },
+    {
+     "name": "Type",
+     "value": "Induction"
+    },
+    {
+     "name": "Warranty",
+     "value": "1 year"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "C-TAVA-0104",
+   "name": "Tavaa Triply Kadai 24 cm",
+   "brand": "Tavaa",
+   "category": "cookware",
+   "hsn": "7323",
+   "gstRate": 5,
+   "price": 2199,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Even heating for curries and stir-fries.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Triply stainless steel"
+    },
+    {
+     "name": "Pieces",
+     "value": "1"
+    },
+    {
+     "name": "Induction base",
+     "value": "Yes"
+    },
+    {
+     "name": "Dishwasher safe",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "C-TAVA-0204",
+   "name": "Tavaa Cast Iron Tawa",
+   "brand": "Tavaa",
+   "category": "cookware",
+   "hsn": "7323",
+   "gstRate": 5,
+   "price": 1299,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Pre-seasoned tawa for dosa and roti.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Pre-seasoned cast iron"
+    },
+    {
+     "name": "Pieces",
+     "value": "1"
+    },
+    {
+     "name": "Induction base",
+     "value": "Yes"
+    },
+    {
+     "name": "Dishwasher safe",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "C-TAVA-0304",
+   "name": "Tavaa Pressure Cooker 5 L",
+   "brand": "Tavaa",
+   "category": "cookware",
+   "hsn": "7323",
+   "gstRate": 5,
+   "price": 2499,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Five-litre cooker with a safety valve.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Stainless steel"
+    },
+    {
+     "name": "Pieces",
+     "value": "1"
+    },
+    {
+     "name": "Induction base",
+     "value": "Yes"
+    },
+    {
+     "name": "Dishwasher safe",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "C-CHEF-0404",
+   "name": "Chefora Non-stick Set",
+   "brand": "Chefora",
+   "category": "cookware",
+   "hsn": "7323",
+   "gstRate": 5,
+   "price": 3499,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Fry pan, kadai and tawa set.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Aluminium, non-stick"
+    },
+    {
+     "name": "Pieces",
+     "value": "3"
+    },
+    {
+     "name": "Induction base",
+     "value": "Yes"
+    },
+    {
+     "name": "Dishwasher safe",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-MITT-0114",
+   "name": "Mitti Stoneware Dinner Set",
+   "brand": "Mitti",
+   "category": "dinnerware",
+   "hsn": "6912",
+   "gstRate": 5,
+   "price": 3999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "Hand-glazed set for six.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Stoneware"
+    },
+    {
+     "name": "Pieces",
+     "value": "18"
+    },
+    {
+     "name": "Microwave safe",
+     "value": "Yes"
+    },
+    {
+     "name": "Pattern",
+     "value": "Speckled blue"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-MITT-0214",
+   "name": "Mitti Steel Thali Set",
+   "brand": "Mitti",
+   "category": "dinnerware",
+   "hsn": "6912",
+   "gstRate": 5,
+   "price": 1499,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Traditional thali with bowls and glass.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Stainless steel"
+    },
+    {
+     "name": "Pieces",
+     "value": "6"
+    },
+    {
+     "name": "Microwave safe",
+     "value": "No"
+    },
+    {
+     "name": "Pattern",
+     "value": "Mirror finish"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-MITT-0314",
+   "name": "Mitti Porcelain Mugs (4)",
+   "brand": "Mitti",
+   "category": "dinnerware",
+   "hsn": "6912",
+   "gstRate": 5,
+   "price": 899,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Classic 350 ml mugs.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Porcelain"
+    },
+    {
+     "name": "Pieces",
+     "value": "4"
+    },
+    {
+     "name": "Microwave safe",
+     "value": "Yes"
+    },
+    {
+     "name": "Pattern",
+     "value": "White"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-MITT-0414",
+   "name": "Mitti Melamine Kids Set",
+   "brand": "Mitti",
+   "category": "dinnerware",
+   "hsn": "6912",
+   "gstRate": 5,
+   "price": 699,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Unbreakable plates and bowls for children.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Melamine"
+    },
+    {
+     "name": "Pieces",
+     "value": "5"
+    },
+    {
+     "name": "Microwave safe",
+     "value": "No"
+    },
+    {
+     "name": "Pattern",
+     "value": "Animals"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "SC-BOXA-0124",
+   "name": "Boxa Airtight Jars (6)",
+   "brand": "Boxa",
+   "category": "storage-containers",
+   "hsn": "3924",
+   "gstRate": 18,
+   "price": 999,
+   "stock": 70,
+   "reorderLevel": 7,
+   "description": "Keeps dal and atta fresh.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "BPA-free plastic"
+    },
+    {
+     "name": "Pieces",
+     "value": "6"
+    },
+    {
+     "name": "Capacity",
+     "value": "1.2 L each"
+    },
+    {
+     "name": "Airtight",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "SC-BOXA-0224",
+   "name": "Boxa Glass Lunch Boxes (3)",
+   "brand": "Boxa",
+   "category": "storage-containers",
+   "hsn": "3924",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 45,
+   "reorderLevel": 4,
+   "description": "Oven- and microwave-safe tiffin.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Borosilicate glass"
+    },
+    {
+     "name": "Pieces",
+     "value": "3"
+    },
+    {
+     "name": "Capacity",
+     "value": "640 ml"
+    },
+    {
+     "name": "Airtight",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "SC-BOXA-0324",
+   "name": "Boxa Steel Masala Box",
+   "brand": "Boxa",
+   "category": "storage-containers",
+   "hsn": "3924",
+   "gstRate": 18,
+   "price": 799,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Spice box with a spoon and glass lid.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Stainless steel"
+    },
+    {
+     "name": "Pieces",
+     "value": "7 bowls"
+    },
+    {
+     "name": "Airtight",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "SC-BOXA-0424",
+   "name": "Boxa Fridge Organisers (4)",
+   "brand": "Boxa",
+   "category": "storage-containers",
+   "hsn": "3924",
+   "gstRate": 18,
+   "price": 1099,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Stackable bins for a tidy fridge.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Clear plastic"
+    },
+    {
+     "name": "Pieces",
+     "value": "4"
+    },
+    {
+     "name": "Airtight",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "HDC-NOOK-0134",
+   "name": "Nookly Wooden Wall Clock",
+   "brand": "Nookly",
+   "category": "home-decor",
+   "hsn": "9105",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Silent sweep clock in solid wood.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Mango wood"
+    },
+    {
+     "name": "Size",
+     "value": "30 cm"
+    },
+    {
+     "name": "Colour",
+     "value": "Natural"
+    },
+    {
+     "name": "Mounting",
+     "value": "Wall"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "HDC-NOOK-0234",
+   "name": "Nookly Brass Diya Set",
+   "brand": "Nookly",
+   "category": "home-decor",
+   "hsn": "9105",
+   "gstRate": 18,
+   "price": 1199,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Hand-crafted diyas for festivals.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Brass"
+    },
+    {
+     "name": "Size",
+     "value": "4 pieces"
+    },
+    {
+     "name": "Colour",
+     "value": "Gold"
+    },
+    {
+     "name": "Mounting",
+     "value": "Table"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "HDC-NOOK-0334",
+   "name": "Nookly Macramé Wall Hanging",
+   "brand": "Nookly",
+   "category": "home-decor",
+   "hsn": "9105",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Hand-knotted boho hanging.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Cotton rope"
+    },
+    {
+     "name": "Size",
+     "value": "60 × 90 cm"
+    },
+    {
+     "name": "Colour",
+     "value": "Off-white"
+    },
+    {
+     "name": "Mounting",
+     "value": "Wall"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "HDC-NOOK-0434",
+   "name": "Nookly Ceramic Vase",
+   "brand": "Nookly",
+   "category": "home-decor",
+   "hsn": "9105",
+   "gstRate": 18,
+   "price": 749,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Matte vase for dried flowers.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Ceramic"
+    },
+    {
+     "name": "Size",
+     "value": "25 cm"
+    },
+    {
+     "name": "Colour",
+     "value": "Terracotta"
+    },
+    {
+     "name": "Mounting",
+     "value": "Table"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "OC-SITW-0105",
+   "name": "Sitwell Ergo Mesh Chair",
+   "brand": "Sitwell",
+   "category": "office-chairs",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 11999,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "All-day comfort with adjustable lumbar support.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Back",
+     "value": "High back, mesh"
+    },
+    {
+     "name": "Adjustments",
+     "value": "Lumbar, 3D arms, headrest"
+    },
+    {
+     "name": "Max load",
+     "value": "120 kg"
+    },
+    {
+     "name": "Warranty",
+     "value": "3 years"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "OC-SITW-0205",
+   "name": "Sitwell Task Chair",
+   "brand": "Sitwell",
+   "category": "office-chairs",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 4999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Simple swivel chair for home offices.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Back",
+     "value": "Mid back"
+    },
+    {
+     "name": "Adjustments",
+     "value": "Height, tilt"
+    },
+    {
+     "name": "Max load",
+     "value": "100 kg"
+    },
+    {
+     "name": "Warranty",
+     "value": "1 year"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "OC-SITW-0305",
+   "name": "Sitwell Executive Leather",
+   "brand": "Sitwell",
+   "category": "office-chairs",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 17999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "Padded executive chair.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Back",
+     "value": "High back, leatherette"
+    },
+    {
+     "name": "Adjustments",
+     "value": "Height, tilt lock"
+    },
+    {
+     "name": "Max load",
+     "value": "130 kg"
+    },
+    {
+     "name": "Warranty",
+     "value": "2 years"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "OC-GAMR-0405",
+   "name": "Gamr Racer Chair",
+   "brand": "Gamr",
+   "category": "office-chairs",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 13999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Gaming chair with a footrest.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Back",
+     "value": "High back, racing style"
+    },
+    {
+     "name": "Adjustments",
+     "value": "4D arms, 155° recline"
+    },
+    {
+     "name": "Max load",
+     "value": "150 kg"
+    },
+    {
+     "name": "Warranty",
+     "value": "2 years"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-DESK-0115",
+   "name": "Deskly Study Table",
+   "brand": "Deskly",
+   "category": "desks",
+   "hsn": "9403",
+   "gstRate": 18,
+   "price": 4999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "Study desk with a drawer and shelf.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "100 × 50 cm"
+    },
+    {
+     "name": "Material",
+     "value": "Engineered wood"
+    },
+    {
+     "name": "Height",
+     "value": "75 cm"
+    },
+    {
+     "name": "Assembly",
+     "value": "DIY"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-DESK-0215",
+   "name": "Deskly Standing Desk",
+   "brand": "Deskly",
+   "category": "desks",
+   "hsn": "9403",
+   "gstRate": 18,
+   "price": 24999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "Sit-stand desk with memory presets.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "140 × 70 cm"
+    },
+    {
+     "name": "Material",
+     "value": "Steel frame, wood top"
+    },
+    {
+     "name": "Height",
+     "value": "70–118 cm, motorised"
+    },
+    {
+     "name": "Assembly",
+     "value": "DIY"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "D-DESK-0315",
+   "name": "Deskly Corner Desk",
+   "brand": "Deskly",
+   "category": "desks",
+   "hsn": "9403",
+   "gstRate": 18,
+   "price": 7999,
+   "stock": 8,
+   "reorderLevel": 1,
+   "description": "L-shaped desk for two monitors.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "120 × 120 cm"
+    },
+    {
+     "name": "Material",
+     "value": "Engineered wood"
+    },
+    {
+     "name": "Height",
+     "value": "75 cm"
+    },
+    {
+     "name": "Assembly",
+     "value": "DIY"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "D-DESK-0415",
+   "name": "Deskly Laptop Table",
+   "brand": "Deskly",
+   "category": "desks",
+   "hsn": "9403",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Folding table for working in bed.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "60 × 40 cm"
+    },
+    {
+     "name": "Material",
+     "value": "Bamboo"
+    },
+    {
+     "name": "Height",
+     "value": "Foldable"
+    },
+    {
+     "name": "Assembly",
+     "value": "None"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-LOUN-0125",
+   "name": "Lounjo 3-Seater Fabric Sofa",
+   "brand": "Lounjo",
+   "category": "sofas",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 28999,
+   "stock": 4,
+   "reorderLevel": 1,
+   "description": "Firm-seated sofa in grey fabric.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Seats",
+     "value": "3"
+    },
+    {
+     "name": "Upholstery",
+     "value": "Fabric"
+    },
+    {
+     "name": "Frame",
+     "value": "Solid wood"
+    },
+    {
+     "name": "Dimensions",
+     "value": "198 × 85 cm"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "S-LOUN-0225",
+   "name": "Lounjo Sofa Cum Bed",
+   "brand": "Lounjo",
+   "category": "sofas",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 22999,
+   "stock": 5,
+   "reorderLevel": 1,
+   "description": "Opens into a double bed for guests.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Seats",
+     "value": "3 (opens to bed)"
+    },
+    {
+     "name": "Upholstery",
+     "value": "Fabric"
+    },
+    {
+     "name": "Frame",
+     "value": "Metal"
+    },
+    {
+     "name": "Dimensions",
+     "value": "185 × 90 cm"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "S-LOUN-0325",
+   "name": "Lounjo L-Shape Sofa",
+   "brand": "Lounjo",
+   "category": "sofas",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 54999,
+   "stock": 2,
+   "reorderLevel": 1,
+   "description": "Large sectional for family rooms.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Seats",
+     "value": "5"
+    },
+    {
+     "name": "Upholstery",
+     "value": "Velvet"
+    },
+    {
+     "name": "Frame",
+     "value": "Solid wood"
+    },
+    {
+     "name": "Dimensions",
+     "value": "250 × 160 cm"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "S-LOUN-0425",
+   "name": "Lounjo Single Recliner",
+   "brand": "Lounjo",
+   "category": "sofas",
+   "hsn": "9401",
+   "gstRate": 18,
+   "price": 19999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "Manual recliner with a rocking base.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Seats",
+     "value": "1"
+    },
+    {
+     "name": "Upholstery",
+     "value": "Leatherette"
+    },
+    {
+     "name": "Frame",
+     "value": "Metal"
+    },
+    {
+     "name": "Dimensions",
+     "value": "90 × 95 cm"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "BM-SNOO-0135",
+   "name": "Snoozr Memory Foam Mattress (Queen)",
+   "brand": "Snoozr",
+   "category": "beds-mattresses",
+   "hsn": "9404",
+   "gstRate": 18,
+   "price": 14999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Cooling gel memory foam, 10-year warranty.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "Queen 78 × 60\""
+    },
+    {
+     "name": "Material",
+     "value": "Memory foam"
+    },
+    {
+     "name": "Firmness",
+     "value": "Medium firm"
+    },
+    {
+     "name": "Thickness",
+     "value": "8\""
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "BM-SNOO-0235",
+   "name": "Snoozr Orthopaedic Mattress (Single)",
+   "brand": "Snoozr",
+   "category": "beds-mattresses",
+   "hsn": "9404",
+   "gstRate": 18,
+   "price": 7999,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Firm support for back pain.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "Single 72 × 36\""
+    },
+    {
+     "name": "Material",
+     "value": "High-density foam"
+    },
+    {
+     "name": "Firmness",
+     "value": "Firm"
+    },
+    {
+     "name": "Thickness",
+     "value": "6\""
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "BM-SNOO-0335",
+   "name": "Snoozr Pillow Pair",
+   "brand": "Snoozr",
+   "category": "beds-mattresses",
+   "hsn": "9404",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Hotel-style pillows, machine washable.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "Standard"
+    },
+    {
+     "name": "Material",
+     "value": "Microfibre"
+    },
+    {
+     "name": "Firmness",
+     "value": "Soft"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "BM-DESK-0435",
+   "name": "Deskly Queen Bed with Storage",
+   "brand": "Deskly",
+   "category": "beds-mattresses",
+   "hsn": "9404",
+   "gstRate": 18,
+   "price": 26999,
+   "stock": 3,
+   "reorderLevel": 1,
+   "description": "Bed with lift-up storage.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Size",
+     "value": "Queen"
+    },
+    {
+     "name": "Material",
+     "value": "Engineered wood"
+    },
+    {
+     "name": "Thickness",
+     "value": "Hydraulic storage"
+    }
+   ],
+   "maxPerOrder": 5
+  },
+  {
+   "sku": "MST-THRE-0106",
+   "name": "Threadly Cotton Crew T-shirt",
+   "brand": "Threadly",
+   "category": "mens-t-shirts",
+   "hsn": "6109",
+   "gstRate": 18,
+   "price": 499,
+   "stock": 200,
+   "reorderLevel": 10,
+   "description": "Soft everyday T-shirt in eight colours.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "100% cotton"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Short"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XXL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MST-THRE-0206",
+   "name": "Threadly Polo T-shirt",
+   "brand": "Threadly",
+   "category": "mens-t-shirts",
+   "hsn": "6109",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Classic polo with a two-button placket.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton piqué"
+    },
+    {
+     "name": "Fit",
+     "value": "Slim"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Short"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XXL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MST-URBA-0306",
+   "name": "Urbanx Oversized Graphic Tee",
+   "brand": "Urbanx",
+   "category": "mens-t-shirts",
+   "hsn": "6109",
+   "gstRate": 18,
+   "price": 799,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Drop-shoulder tee with a printed back.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton"
+    },
+    {
+     "name": "Fit",
+     "value": "Oversized"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Short"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MST-URBA-0406",
+   "name": "Urbanx Merino Performance Tee",
+   "brand": "Urbanx",
+   "category": "mens-t-shirts",
+   "hsn": "6109",
+   "gstRate": 18,
+   "price": 2999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "Odour-resistant tee for runs and treks.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Merino wool blend"
+    },
+    {
+     "name": "Fit",
+     "value": "Athletic"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Short"
+    },
+    {
+     "name": "Sizes",
+     "value": "M–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSS-THRE-0116",
+   "name": "Threadly Oxford Shirt",
+   "brand": "Threadly",
+   "category": "mens-shirts",
+   "hsn": "6205",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Crisp shirt that works with jeans or trousers.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton oxford"
+    },
+    {
+     "name": "Fit",
+     "value": "Slim"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Occasion",
+     "value": "Office"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSS-THRE-0216",
+   "name": "Threadly Linen Shirt",
+   "brand": "Threadly",
+   "category": "mens-shirts",
+   "hsn": "6205",
+   "gstRate": 18,
+   "price": 2299,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Breathable linen for hot days.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Pure linen"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Occasion",
+     "value": "Summer"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSS-URBA-0316",
+   "name": "Urbanx Check Flannel Shirt",
+   "brand": "Urbanx",
+   "category": "mens-shirts",
+   "hsn": "6205",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Soft brushed checks.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton flannel"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Occasion",
+     "value": "Casual"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSS-REGA-0416",
+   "name": "Regalo Silk Festive Kurta Shirt",
+   "brand": "Regalo",
+   "category": "mens-shirts",
+   "hsn": "6205",
+   "gstRate": 18,
+   "price": 3499,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Festive shirt with a mandarin collar.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Art silk"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Occasion",
+     "value": "Festive"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSJ-DENI-0126",
+   "name": "Denimo Slim Fit Jeans",
+   "brand": "Denimo",
+   "category": "mens-jeans",
+   "hsn": "6203",
+   "gstRate": 18,
+   "price": 1799,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Mid-blue slim jeans with stretch.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Stretch denim"
+    },
+    {
+     "name": "Fit",
+     "value": "Slim"
+    },
+    {
+     "name": "Rise",
+     "value": "Mid"
+    },
+    {
+     "name": "Sizes",
+     "value": "28–38"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSJ-DENI-0226",
+   "name": "Denimo Straight Fit Jeans",
+   "brand": "Denimo",
+   "category": "mens-jeans",
+   "hsn": "6203",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 70,
+   "reorderLevel": 7,
+   "description": "Classic straight leg.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Denim"
+    },
+    {
+     "name": "Fit",
+     "value": "Straight"
+    },
+    {
+     "name": "Rise",
+     "value": "Mid"
+    },
+    {
+     "name": "Sizes",
+     "value": "30–40"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSJ-DENI-0326",
+   "name": "Denimo Selvedge Jeans",
+   "brand": "Denimo",
+   "category": "mens-jeans",
+   "hsn": "6203",
+   "gstRate": 18,
+   "price": 4499,
+   "stock": 12,
+   "reorderLevel": 1,
+   "description": "Raw selvedge denim that fades with wear.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Japanese selvedge denim"
+    },
+    {
+     "name": "Fit",
+     "value": "Tapered"
+    },
+    {
+     "name": "Rise",
+     "value": "Mid"
+    },
+    {
+     "name": "Sizes",
+     "value": "30–36"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSJ-URBA-0426",
+   "name": "Urbanx Cargo Jeans",
+   "brand": "Urbanx",
+   "category": "mens-jeans",
+   "hsn": "6203",
+   "gstRate": 18,
+   "price": 2199,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Relaxed jeans with cargo pockets.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Denim"
+    },
+    {
+     "name": "Fit",
+     "value": "Relaxed"
+    },
+    {
+     "name": "Rise",
+     "value": "Mid"
+    },
+    {
+     "name": "Sizes",
+     "value": "28–36"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSF-STRI-0136",
+   "name": "Stridex Running Shoes",
+   "brand": "Stridex",
+   "category": "mens-footwear",
+   "hsn": "6404",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Cushioned running shoes, 240 g.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Running"
+    },
+    {
+     "name": "Upper",
+     "value": "Mesh"
+    },
+    {
+     "name": "Sole",
+     "value": "EVA"
+    },
+    {
+     "name": "Sizes",
+     "value": "UK 6–11"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSF-STRI-0236",
+   "name": "Stridex Leather Formal Shoes",
+   "brand": "Stridex",
+   "category": "mens-footwear",
+   "hsn": "6404",
+   "gstRate": 18,
+   "price": 3999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Polished Oxfords for office.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Formal Oxford"
+    },
+    {
+     "name": "Upper",
+     "value": "Leather"
+    },
+    {
+     "name": "Sole",
+     "value": "TPR"
+    },
+    {
+     "name": "Sizes",
+     "value": "UK 6–11"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSF-STRI-0336",
+   "name": "Stridex Canvas Sneakers",
+   "brand": "Stridex",
+   "category": "mens-footwear",
+   "hsn": "6404",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Everyday canvas sneakers.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Sneakers"
+    },
+    {
+     "name": "Upper",
+     "value": "Canvas"
+    },
+    {
+     "name": "Sole",
+     "value": "Rubber"
+    },
+    {
+     "name": "Sizes",
+     "value": "UK 6–11"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "MSF-STRI-0436",
+   "name": "Stridex Trek Boots",
+   "brand": "Stridex",
+   "category": "mens-footwear",
+   "hsn": "6404",
+   "gstRate": 18,
+   "price": 5499,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Waterproof boots with ankle support.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Hiking boots"
+    },
+    {
+     "name": "Upper",
+     "value": "Suede + mesh, waterproof"
+    },
+    {
+     "name": "Sole",
+     "value": "Rubber lug"
+    },
+    {
+     "name": "Sizes",
+     "value": "UK 7–11"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "K-RANG-0107",
+   "name": "Rangoli Cotton Straight Kurta",
+   "brand": "Rangoli",
+   "category": "kurtas",
+   "hsn": "6204",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Hand-block printed cotton kurta.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton"
+    },
+    {
+     "name": "Length",
+     "value": "Calf"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Three-quarter"
+    },
+    {
+     "name": "Sizes",
+     "value": "XS–XXL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "K-RANG-0207",
+   "name": "Rangoli Anarkali Kurta",
+   "brand": "Rangoli",
+   "category": "kurtas",
+   "hsn": "6204",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Flared Anarkali with gota trim.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Rayon"
+    },
+    {
+     "name": "Length",
+     "value": "Ankle"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XXL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "K-RANG-0307",
+   "name": "Rangoli Kurta Set with Dupatta",
+   "brand": "Rangoli",
+   "category": "kurtas",
+   "hsn": "6204",
+   "gstRate": 18,
+   "price": 3299,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Kurta, pants and dupatta set.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Chanderi"
+    },
+    {
+     "name": "Length",
+     "value": "Calf"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Three-quarter"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "K-ETHN-0407",
+   "name": "Ethnika Silk Festive Kurta",
+   "brand": "Ethnika",
+   "category": "kurtas",
+   "hsn": "6204",
+   "gstRate": 18,
+   "price": 5499,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Zari-embroidered festive kurta.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Silk blend"
+    },
+    {
+     "name": "Length",
+     "value": "Knee"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ETHN-0117",
+   "name": "Ethnika Kanjivaram Silk Saree",
+   "brand": "Ethnika",
+   "category": "sarees",
+   "hsn": "5007",
+   "gstRate": 5,
+   "price": 12999,
+   "stock": 6,
+   "reorderLevel": 1,
+   "description": "Rich Kanjivaram weave with a contrast border.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Pure silk"
+    },
+    {
+     "name": "Length",
+     "value": "6.3 m"
+    },
+    {
+     "name": "Blouse piece",
+     "value": "Yes"
+    },
+    {
+     "name": "Work",
+     "value": "Zari border"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ETHN-0217",
+   "name": "Ethnika Cotton Handloom Saree",
+   "brand": "Ethnika",
+   "category": "sarees",
+   "hsn": "5007",
+   "gstRate": 5,
+   "price": 1999,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Breathable handloom for daily wear.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Handloom cotton"
+    },
+    {
+     "name": "Length",
+     "value": "6.2 m"
+    },
+    {
+     "name": "Blouse piece",
+     "value": "Yes"
+    },
+    {
+     "name": "Work",
+     "value": "Woven stripes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-RANG-0317",
+   "name": "Rangoli Georgette Printed Saree",
+   "brand": "Rangoli",
+   "category": "sarees",
+   "hsn": "5007",
+   "gstRate": 5,
+   "price": 1299,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Light, easy-drape printed saree.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Georgette"
+    },
+    {
+     "name": "Length",
+     "value": "5.5 m"
+    },
+    {
+     "name": "Blouse piece",
+     "value": "Yes"
+    },
+    {
+     "name": "Work",
+     "value": "Printed"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ETHN-0417",
+   "name": "Ethnika Banarasi Saree",
+   "brand": "Ethnika",
+   "category": "sarees",
+   "hsn": "5007",
+   "gstRate": 5,
+   "price": 7999,
+   "stock": 8,
+   "reorderLevel": 1,
+   "description": "Banarasi brocade for weddings.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Silk blend"
+    },
+    {
+     "name": "Length",
+     "value": "6.3 m"
+    },
+    {
+     "name": "Blouse piece",
+     "value": "Yes"
+    },
+    {
+     "name": "Work",
+     "value": "Banarasi brocade"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WST-BLOO-0127",
+   "name": "Bloomz Ribbed Crop Top",
+   "brand": "Bloomz",
+   "category": "womens-tops",
+   "hsn": "6206",
+   "gstRate": 18,
+   "price": 599,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Stretchy ribbed crop top.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Cotton rib"
+    },
+    {
+     "name": "Fit",
+     "value": "Fitted"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Short"
+    },
+    {
+     "name": "Sizes",
+     "value": "XS–L"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WST-BLOO-0227",
+   "name": "Bloomz Linen Shirt Top",
+   "brand": "Bloomz",
+   "category": "womens-tops",
+   "hsn": "6206",
+   "gstRate": 18,
+   "price": 1599,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Relaxed linen button-down.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Linen blend"
+    },
+    {
+     "name": "Fit",
+     "value": "Relaxed"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WST-BLOO-0327",
+   "name": "Bloomz Peplum Top",
+   "brand": "Bloomz",
+   "category": "womens-tops",
+   "hsn": "6206",
+   "gstRate": 18,
+   "price": 999,
+   "stock": 55,
+   "reorderLevel": 5,
+   "description": "Office-ready peplum top.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Crepe"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Sleeveless"
+    },
+    {
+     "name": "Sizes",
+     "value": "S–XL"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "WST-URBA-0427",
+   "name": "Urbanx Satin Party Top",
+   "brand": "Urbanx",
+   "category": "womens-tops",
+   "hsn": "6206",
+   "gstRate": 18,
+   "price": 2799,
+   "stock": 15,
+   "reorderLevel": 1,
+   "description": "Satin top with a cowl neck.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Fabric",
+     "value": "Satin"
+    },
+    {
+     "name": "Fit",
+     "value": "Regular"
+    },
+    {
+     "name": "Sleeve",
+     "value": "Full"
+    },
+    {
+     "name": "Sizes",
+     "value": "XS–L"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-CARR-0137",
+   "name": "Carryo Tote Bag",
+   "brand": "Carryo",
+   "category": "handbags",
+   "hsn": "4202",
+   "gstRate": 18,
+   "price": 1999,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Roomy tote that fits a laptop.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Vegan leather"
+    },
+    {
+     "name": "Size",
+     "value": "Large"
+    },
+    {
+     "name": "Closure",
+     "value": "Magnetic"
+    },
+    {
+     "name": "Compartments",
+     "value": "3"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-CARR-0237",
+   "name": "Carryo Sling Bag",
+   "brand": "Carryo",
+   "category": "handbags",
+   "hsn": "4202",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Cross-body sling for essentials.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Vegan leather"
+    },
+    {
+     "name": "Size",
+     "value": "Small"
+    },
+    {
+     "name": "Closure",
+     "value": "Zip"
+    },
+    {
+     "name": "Compartments",
+     "value": "2"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-CARR-0337",
+   "name": "Carryo Leather Satchel",
+   "brand": "Carryo",
+   "category": "handbags",
+   "hsn": "4202",
+   "gstRate": 18,
+   "price": 5999,
+   "stock": 10,
+   "reorderLevel": 1,
+   "description": "Structured leather satchel.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Genuine leather"
+    },
+    {
+     "name": "Size",
+     "value": "Medium"
+    },
+    {
+     "name": "Closure",
+     "value": "Buckle"
+    },
+    {
+     "name": "Compartments",
+     "value": "4"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-CARR-0437",
+   "name": "Carryo Clutch",
+   "brand": "Carryo",
+   "category": "handbags",
+   "hsn": "4202",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Beaded clutch for evenings.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Material",
+     "value": "Embellished fabric"
+    },
+    {
+     "name": "Size",
+     "value": "Small"
+    },
+    {
+     "name": "Closure",
+     "value": "Clasp"
+    },
+    {
+     "name": "Compartments",
+     "value": "1"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-GLOW-0108",
+   "name": "Glowra Vitamin C Serum",
+   "brand": "Glowra",
+   "category": "skincare",
+   "hsn": "3304",
+   "gstRate": 18,
+   "price": 699,
+   "stock": 100,
+   "reorderLevel": 10,
+   "description": "Brightening serum for dull skin.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Skin type",
+     "value": "All"
+    },
+    {
+     "name": "Quantity",
+     "value": "30 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "10% vitamin C"
+    },
+    {
+     "name": "Fragrance",
+     "value": "Free"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-GLOW-0208",
+   "name": "Glowra Sunscreen SPF 50",
+   "brand": "Glowra",
+   "category": "skincare",
+   "hsn": "3304",
+   "gstRate": 18,
+   "price": 499,
+   "stock": 150,
+   "reorderLevel": 10,
+   "description": "Light gel sunscreen, no white cast.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Skin type",
+     "value": "All"
+    },
+    {
+     "name": "Quantity",
+     "value": "50 g"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "SPF 50 PA++++"
+    },
+    {
+     "name": "Fragrance",
+     "value": "Free"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-GLOW-0308",
+   "name": "Glowra Ceramide Moisturiser",
+   "brand": "Glowra",
+   "category": "skincare",
+   "hsn": "3304",
+   "gstRate": 18,
+   "price": 599,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Barrier-repair cream.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Skin type",
+     "value": "Dry"
+    },
+    {
+     "name": "Quantity",
+     "value": "50 g"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Ceramides"
+    },
+    {
+     "name": "Fragrance",
+     "value": "Free"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-GLOW-0408",
+   "name": "Glowra Niacinamide Face Wash",
+   "brand": "Glowra",
+   "category": "skincare",
+   "hsn": "3304",
+   "gstRate": 18,
+   "price": 349,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Oil-control face wash.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Skin type",
+     "value": "Oily"
+    },
+    {
+     "name": "Quantity",
+     "value": "100 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Niacinamide"
+    },
+    {
+     "name": "Fragrance",
+     "value": "Mild"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-TRES-0118",
+   "name": "Tressa Onion Shampoo",
+   "brand": "Tressa",
+   "category": "haircare",
+   "hsn": "3305",
+   "gstRate": 5,
+   "price": 399,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Reduces hair fall with regular use.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Hair type",
+     "value": "All"
+    },
+    {
+     "name": "Quantity",
+     "value": "250 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Onion oil"
+    },
+    {
+     "name": "Sulphate free",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-TRES-0218",
+   "name": "Tressa Coconut Hair Oil",
+   "brand": "Tressa",
+   "category": "haircare",
+   "hsn": "3305",
+   "gstRate": 5,
+   "price": 249,
+   "stock": 200,
+   "reorderLevel": 10,
+   "description": "Pure cold-pressed coconut oil.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Hair type",
+     "value": "All"
+    },
+    {
+     "name": "Quantity",
+     "value": "300 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Cold-pressed coconut"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-TRES-0318",
+   "name": "Tressa Keratin Conditioner",
+   "brand": "Tressa",
+   "category": "haircare",
+   "hsn": "3305",
+   "gstRate": 5,
+   "price": 449,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Smooths frizz.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Hair type",
+     "value": "Frizzy"
+    },
+    {
+     "name": "Quantity",
+     "value": "200 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Keratin"
+    },
+    {
+     "name": "Sulphate free",
+     "value": "Yes"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "H-TRES-0418",
+   "name": "Tressa Anti-dandruff Shampoo",
+   "brand": "Tressa",
+   "category": "haircare",
+   "hsn": "3305",
+   "gstRate": 5,
+   "price": 349,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Clinically tested anti-dandruff formula.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Hair type",
+     "value": "Dandruff"
+    },
+    {
+     "name": "Quantity",
+     "value": "200 ml"
+    },
+    {
+     "name": "Key ingredient",
+     "value": "Ketoconazole 1%"
+    },
+    {
+     "name": "Sulphate free",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "F-AURA-0128",
+   "name": "Aurae Oud Noir EDP",
+   "brand": "Aurae",
+   "category": "fragrances",
+   "hsn": "3303",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 30,
+   "reorderLevel": 3,
+   "description": "Warm oud for evenings.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Eau de parfum"
+    },
+    {
+     "name": "Quantity",
+     "value": "100 ml"
+    },
+    {
+     "name": "Notes",
+     "value": "Oud, amber"
+    },
+    {
+     "name": "Longevity",
+     "value": "8–10 h"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "F-AURA-0228",
+   "name": "Aurae Citrus Fresh EDT",
+   "brand": "Aurae",
+   "category": "fragrances",
+   "hsn": "3303",
+   "gstRate": 18,
+   "price": 1299,
+   "stock": 45,
+   "reorderLevel": 4,
+   "description": "Fresh daytime scent.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Eau de toilette"
+    },
+    {
+     "name": "Quantity",
+     "value": "100 ml"
+    },
+    {
+     "name": "Notes",
+     "value": "Bergamot, neroli"
+    },
+    {
+     "name": "Longevity",
+     "value": "4–6 h"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "F-AURA-0328",
+   "name": "Aurae Attar Rose",
+   "brand": "Aurae",
+   "category": "fragrances",
+   "hsn": "3303",
+   "gstRate": 18,
+   "price": 899,
+   "stock": 25,
+   "reorderLevel": 2,
+   "description": "Alcohol-free rose attar.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Attar (oil)"
+    },
+    {
+     "name": "Quantity",
+     "value": "12 ml"
+    },
+    {
+     "name": "Notes",
+     "value": "Rose"
+    },
+    {
+     "name": "Longevity",
+     "value": "10 h+"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "F-AURA-0428",
+   "name": "Aurae Body Mist Trio",
+   "brand": "Aurae",
+   "category": "fragrances",
+   "hsn": "3303",
+   "gstRate": 18,
+   "price": 799,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Three light mists.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Body mist"
+    },
+    {
+     "name": "Quantity",
+     "value": "3 × 50 ml"
+    },
+    {
+     "name": "Notes",
+     "value": "Floral, fruity"
+    },
+    {
+     "name": "Longevity",
+     "value": "2–3 h"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "G-TRIM-0138",
+   "name": "Trimr Beard Trimmer",
+   "brand": "Trimr",
+   "category": "grooming",
+   "hsn": "8510",
+   "gstRate": 18,
+   "price": 1499,
+   "stock": 70,
+   "reorderLevel": 7,
+   "description": "Precise trimmer with a titanium blade.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Trimmer"
+    },
+    {
+     "name": "Battery",
+     "value": "90 min"
+    },
+    {
+     "name": "Attachments",
+     "value": "20 length settings"
+    },
+    {
+     "name": "Waterproof",
+     "value": "IPX7"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "G-TRIM-0238",
+   "name": "Trimr Hair Clipper Pro",
+   "brand": "Trimr",
+   "category": "grooming",
+   "hsn": "8510",
+   "gstRate": 18,
+   "price": 2499,
+   "stock": 35,
+   "reorderLevel": 3,
+   "description": "Salon-style clipper.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Clipper"
+    },
+    {
+     "name": "Battery",
+     "value": "120 min"
+    },
+    {
+     "name": "Attachments",
+     "value": "8 combs"
+    },
+    {
+     "name": "Waterproof",
+     "value": "No"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "G-TRIM-0338",
+   "name": "Trimr Electric Shaver",
+   "brand": "Trimr",
+   "category": "grooming",
+   "hsn": "8510",
+   "gstRate": 18,
+   "price": 3999,
+   "stock": 20,
+   "reorderLevel": 2,
+   "description": "Wet and dry shaving.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Rotary shaver"
+    },
+    {
+     "name": "Battery",
+     "value": "60 min"
+    },
+    {
+     "name": "Attachments",
+     "value": "Pop-up trimmer"
+    },
+    {
+     "name": "Waterproof",
+     "value": "IPX7"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "G-TRIM-0438",
+   "name": "Trimr Grooming Kit 7-in-1",
+   "brand": "Trimr",
+   "category": "grooming",
+   "hsn": "8510",
+   "gstRate": 18,
+   "price": 2199,
+   "stock": 40,
+   "reorderLevel": 4,
+   "description": "Beard, nose, ear and body in one kit.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Type",
+     "value": "Multi-groomer"
+    },
+    {
+     "name": "Battery",
+     "value": "90 min"
+    },
+    {
+     "name": "Attachments",
+     "value": "7"
+    },
+    {
+     "name": "Waterproof",
+     "value": "IPX5"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ANNA-0109",
+   "name": "Annam Whole Wheat Atta 10 kg",
+   "brand": "Annam",
+   "category": "staples",
+   "hsn": "1101",
+   "gstRate": 5,
+   "price": 499,
+   "stock": 100,
+   "reorderLevel": 10,
+   "description": "Stone-ground chakki atta.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "10 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Whole wheat"
+    },
+    {
+     "name": "Organic",
+     "value": "No"
+    },
+    {
+     "name": "Shelf life",
+     "value": "3 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ANNA-0209",
+   "name": "Annam Basmati Rice 5 kg",
+   "brand": "Annam",
+   "category": "staples",
+   "hsn": "1101",
+   "gstRate": 5,
+   "price": 699,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Long-grain basmati aged one year.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "5 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Aged basmati"
+    },
+    {
+     "name": "Organic",
+     "value": "No"
+    },
+    {
+     "name": "Shelf life",
+     "value": "12 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ANNA-0309",
+   "name": "Annam Toor Dal 1 kg",
+   "brand": "Annam",
+   "category": "staples",
+   "hsn": "1101",
+   "gstRate": 5,
+   "price": 179,
+   "stock": 150,
+   "reorderLevel": 10,
+   "description": "Unpolished, cooks soft.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "1 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Unpolished toor dal"
+    },
+    {
+     "name": "Organic",
+     "value": "No"
+    },
+    {
+     "name": "Shelf life",
+     "value": "9 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-ANNA-0409",
+   "name": "Annam Organic Moong Dal 1 kg",
+   "brand": "Annam",
+   "category": "staples",
+   "hsn": "1101",
+   "gstRate": 5,
+   "price": 229,
+   "stock": 0,
+   "reorderLevel": 1,
+   "description": "Certified organic moong dal.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "1 kg"
+    },
+    {
+     "name": "Type",
+     "value": "Split moong"
+    },
+    {
+     "name": "Organic",
+     "value": "Yes"
+    },
+    {
+     "name": "Shelf life",
+     "value": "9 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KURK-0119",
+   "name": "Kurkura Aloo Bhujia 400 g",
+   "brand": "Kurkura",
+   "category": "snacks",
+   "hsn": "2106",
+   "gstRate": 5,
+   "price": 119,
+   "stock": 200,
+   "reorderLevel": 10,
+   "description": "Crisp Bikaneri-style bhujia.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "400 g"
+    },
+    {
+     "name": "Type",
+     "value": "Namkeen"
+    },
+    {
+     "name": "Vegetarian",
+     "value": "Yes"
+    },
+    {
+     "name": "Shelf life",
+     "value": "4 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KURK-0219",
+   "name": "Kurkura Roasted Makhana 200 g",
+   "brand": "Kurkura",
+   "category": "snacks",
+   "hsn": "2106",
+   "gstRate": 5,
+   "price": 249,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Peri-peri roasted fox nuts.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "200 g"
+    },
+    {
+     "name": "Type",
+     "value": "Roasted makhana"
+    },
+    {
+     "name": "Vegetarian",
+     "value": "Yes"
+    },
+    {
+     "name": "Shelf life",
+     "value": "6 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KURK-0319",
+   "name": "Kurkura Dark Chocolate 100 g",
+   "brand": "Kurkura",
+   "category": "snacks",
+   "hsn": "2106",
+   "gstRate": 5,
+   "price": 149,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Dark chocolate with sea salt.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "100 g"
+    },
+    {
+     "name": "Type",
+     "value": "Chocolate, 70% cocoa"
+    },
+    {
+     "name": "Vegetarian",
+     "value": "Yes"
+    },
+    {
+     "name": "Shelf life",
+     "value": "9 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "S-KURK-0419",
+   "name": "Kurkura Millet Cookies 250 g",
+   "brand": "Kurkura",
+   "category": "snacks",
+   "hsn": "2106",
+   "gstRate": 5,
+   "price": 129,
+   "stock": 100,
+   "reorderLevel": 10,
+   "description": "Ragi and jowar cookies, no maida.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "250 g"
+    },
+    {
+     "name": "Type",
+     "value": "Cookies"
+    },
+    {
+     "name": "Vegetarian",
+     "value": "Yes"
+    },
+    {
+     "name": "Shelf life",
+     "value": "6 months"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "B-CHAI-0129",
+   "name": "Chaiwala Assam Tea 500 g",
+   "brand": "Chaiwala",
+   "category": "beverages",
+   "hsn": "0902",
+   "gstRate": 5,
+   "price": 299,
+   "stock": 120,
+   "reorderLevel": 10,
+   "description": "Strong, malty Assam CTC.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "500 g"
+    },
+    {
+     "name": "Type",
+     "value": "Black tea, CTC"
+    },
+    {
+     "name": "Caffeine",
+     "value": "Yes"
+    },
+    {
+     "name": "Origin",
+     "value": "Assam"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "B-CHAI-0229",
+   "name": "Chaiwala Masala Chai 250 g",
+   "brand": "Chaiwala",
+   "category": "beverages",
+   "hsn": "0902",
+   "gstRate": 5,
+   "price": 249,
+   "stock": 90,
+   "reorderLevel": 9,
+   "description": "Tea with cardamom, ginger and clove.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "250 g"
+    },
+    {
+     "name": "Type",
+     "value": "Tea with spices"
+    },
+    {
+     "name": "Caffeine",
+     "value": "Yes"
+    },
+    {
+     "name": "Origin",
+     "value": "Assam"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "B-BREW-0329",
+   "name": "Brewly Filter Coffee 500 g",
+   "brand": "Brewly",
+   "category": "beverages",
+   "hsn": "0902",
+   "gstRate": 5,
+   "price": 399,
+   "stock": 70,
+   "reorderLevel": 7,
+   "description": "South Indian filter coffee.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "500 g"
+    },
+    {
+     "name": "Type",
+     "value": "Coffee-chicory 80:20"
+    },
+    {
+     "name": "Caffeine",
+     "value": "Yes"
+    },
+    {
+     "name": "Origin",
+     "value": "Coorg"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "B-BREW-0429",
+   "name": "Brewly Green Tea (50 bags)",
+   "brand": "Brewly",
+   "category": "beverages",
+   "hsn": "0902",
+   "gstRate": 5,
+   "price": 199,
+   "stock": 100,
+   "reorderLevel": 10,
+   "description": "Light green tea bags.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "50 bags"
+    },
+    {
+     "name": "Type",
+     "value": "Green tea"
+    },
+    {
+     "name": "Caffeine",
+     "value": "Low"
+    },
+    {
+     "name": "Origin",
+     "value": "Darjeeling"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "DF-MEWA-0139",
+   "name": "Mewa California Almonds 500 g",
+   "brand": "Mewa",
+   "category": "dry-fruits",
+   "hsn": "0802",
+   "gstRate": 5,
+   "price": 549,
+   "stock": 80,
+   "reorderLevel": 8,
+   "description": "Crunchy, whole almonds.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "500 g"
+    },
+    {
+     "name": "Type",
+     "value": "Almonds"
+    },
+    {
+     "name": "Grade",
+     "value": "Premium"
+    },
+    {
+     "name": "Origin",
+     "value": "California"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "DF-MEWA-0239",
+   "name": "Mewa W240 Cashews 500 g",
+   "brand": "Mewa",
+   "category": "dry-fruits",
+   "hsn": "0802",
+   "gstRate": 5,
+   "price": 699,
+   "stock": 60,
+   "reorderLevel": 6,
+   "description": "Large whole cashews.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "500 g"
+    },
+    {
+     "name": "Type",
+     "value": "Cashews"
+    },
+    {
+     "name": "Grade",
+     "value": "W240"
+    },
+    {
+     "name": "Origin",
+     "value": "Goa"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "DF-MEWA-0339",
+   "name": "Mewa Kashmiri Walnuts 250 g",
+   "brand": "Mewa",
+   "category": "dry-fruits",
+   "hsn": "0802",
+   "gstRate": 5,
+   "price": 399,
+   "stock": 50,
+   "reorderLevel": 5,
+   "description": "Light-coloured walnut halves.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "250 g"
+    },
+    {
+     "name": "Type",
+     "value": "Walnut kernels"
+    },
+    {
+     "name": "Grade",
+     "value": "Light halves"
+    },
+    {
+     "name": "Origin",
+     "value": "Kashmir"
+    }
+   ],
+   "maxPerOrder": null
+  },
+  {
+   "sku": "DF-MEWA-0439",
+   "name": "Mewa Medjool Dates 400 g",
+   "brand": "Mewa",
+   "category": "dry-fruits",
+   "hsn": "0802",
+   "gstRate": 5,
+   "price": 599,
+   "stock": 0,
+   "reorderLevel": 1,
+   "description": "Soft, caramel-sweet Medjool dates.\n\nSold and shipped by Order Platform. Free delivery; 7-day returns.",
+   "specs": [
+    {
+     "name": "Pack size",
+     "value": "400 g"
+    },
+    {
+     "name": "Type",
+     "value": "Dates"
+    },
+    {
+     "name": "Grade",
+     "value": "Jumbo"
+    },
+    {
+     "name": "Origin",
+     "value": "Jordan"
+    }
+   ],
+   "maxPerOrder": null
+  }
+ ],
+ "existing": {
+  "WIDGET-A": "office-chairs",
+  "GADGET-X": "monitors",
+  "WIDGET-B": "keyboards-mice"
+ }
+}

@@ -1,0 +1,139 @@
+# Infrastructure for the Order Integration Platform.
+# Container names are prefixed "oip-" and ports are chosen not to clash with other local containers.
+name: oip
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: oip-postgres
+    environment:
+      POSTGRES_DB: orders
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+    ports:
+      - "5434:5432"
+    volumes:
+      - oip-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Kafka in KRaft mode — no Zookeeper required
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: oip-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Catches every outgoing email locally. Inbox at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.21
+    container_name: oip-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # Topics, consumer groups and the dead letter topic at http://localhost:8085
+  # Host networking lets it reach the broker's advertised address, localhost:9092
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.2.0
+    container_name: oip-kafka-ui
+    network_mode: host
+    environment:
+      SERVER_PORT: 8085
+      KAFKA_CLUSTERS_0_NAME: oip
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: localhost:9092
+
+  # Scrapes /actuator/prometheus from the app running on the host. UI at http://localhost:9090
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: oip-prometheus
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - oip-prometheus-data:/prometheus
+
+  # Dashboards at http://localhost:3000 (admin / admin)
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: oip-grafana
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - oip-grafana-data:/var/lib/grafana
+
+  # Narayana LRA coordinator: keeps every saga, and calls the app back to compensate one that
+  # failed or timed out. Its log is on a volume, so open sagas survive a restart.
+  # List of sagas at http://localhost:8087/lra-coordinator
+  lra-coordinator:
+    image: quay.io/jbosstm/lra-coordinator:7.2.2.Final-3.29.3
+    container_name: oip-lra-coordinator
+    ports:
+      - "8087:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - oip-lra-data:/deployments/ObjectStore
+    depends_on:
+      lra-data-init:
+        condition: service_completed_successfully
+
+  # The image has no ObjectStore folder, so Docker creates the volume owned by root, and the
+  # coordinator (uid 185) cannot write its log: every new saga then fails with HTTP 500.
+  # This gives the volume to the coordinator's user before it starts.
+  lra-data-init:
+    image: busybox:1.37
+    container_name: oip-lra-data-init
+    user: "0"
+    command: ["sh", "-c", "chown -R 185:0 /store && chmod -R g+rwX /store"]
+    volumes:
+      - oip-lra-data:/store
+
+  # Sign-in for the app, with the order-platform realm imported:
+  # `docker compose --profile keycloak up -d`. Admin console at http://localhost:8084 (admin / admin).
+  # Port 8084 is what the app expects (KEYCLOAK_ISSUER_URI) and leaves 8080 free for other projects
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.1
+    container_name: oip-keycloak
+    profiles: ["keycloak"]
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8084:8080"
+    volumes:
+      - ./ops/keycloak/order-platform-realm.json:/opt/keycloak/data/import/order-platform-realm.json:ro
+
+volumes:
+  oip-postgres-data:
+  oip-prometheus-data:
+  oip-grafana-data:
+  oip-lra-data:

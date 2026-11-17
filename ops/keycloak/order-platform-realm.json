@@ -1,0 +1,221 @@
+{
+  "realm": "order-platform",
+  "enabled": true,
+  "displayName": "Order Platform",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "bruteForceProtected": true,
+  "sslRequired": "external",
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Operations: every order, the DLQ, routes, returns and driver assignment"
+      },
+      {
+        "name": "CUSTOMER",
+        "description": "Places orders and sees only their own"
+      },
+      {
+        "name": "DELIVERY",
+        "description": "Takes orders from the dispatch list and delivers them"
+      },
+      {
+        "name": "SERVICE",
+        "description": "Another system calling in, such as the warehouse"
+      },
+      {
+        "name": "offline_access",
+        "description": "Keycloak built-in: offline refresh tokens"
+      },
+      {
+        "name": "uma_authorization",
+        "description": "Keycloak built-in: user-managed access"
+      },
+      {
+        "name": "default-roles-order-platform",
+        "description": "Given to everyone who signs up",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "offline_access",
+            "uma_authorization",
+            "CUSTOMER"
+          ]
+        }
+      }
+    ]
+  },
+  "defaultRole": {
+    "name": "default-roles-order-platform"
+  },
+  "clients": [
+    {
+      "clientId": "order-platform-web",
+      "name": "Order Platform web app",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:9091/*",
+        "http://localhost:5173/*",
+        "http://localhost:4173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:9091",
+        "http://localhost:5173",
+        "http://localhost:4173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:9091/*##http://localhost:5173/*##http://localhost:4173/*"
+      }
+    },
+    {
+      "clientId": "order-platform-cli",
+      "name": "Development only: password login for curl and tests",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "warehouse-service",
+      "name": "Warehouse system sending fulfillment signals",
+      "publicClient": false,
+      "secret": "dev-warehouse-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "id": "11111111-0000-4000-8000-000000000100",
+      "username": "alice.smith@example.com",
+      "email": "alice.smith@example.com",
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-order-platform"
+      ]
+    },
+    {
+      "id": "11111111-0000-4000-8000-000000000101",
+      "username": "bob.johnson@example.com",
+      "email": "bob.johnson@example.com",
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Johnson",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-order-platform"
+      ]
+    },
+    {
+      "id": "11111111-0000-4000-8000-000000000601",
+      "username": "john.doe@example.com",
+      "email": "john.doe@example.com",
+      "emailVerified": true,
+      "firstName": "John",
+      "lastName": "Doe",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-order-platform"
+      ]
+    },
+    {
+      "id": "22222222-0000-4000-8000-000000000001",
+      "username": "admin@example.com",
+      "email": "admin@example.com",
+      "emailVerified": true,
+      "firstName": "Operations",
+      "lastName": "Admin",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "id": "33333333-0000-4000-8000-000000000001",
+      "username": "driver1@example.com",
+      "email": "driver1@example.com",
+      "emailVerified": true,
+      "firstName": "Dev",
+      "lastName": "Driver One",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DELIVERY"
+      ]
+    },
+    {
+      "id": "33333333-0000-4000-8000-000000000002",
+      "username": "driver2@example.com",
+      "email": "driver2@example.com",
+      "emailVerified": true,
+      "firstName": "Dev",
+      "lastName": "Driver Two",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DELIVERY"
+      ]
+    },
+    {
+      "id": "44444444-0000-4000-8000-000000000001",
+      "username": "service-account-warehouse-service",
+      "enabled": true,
+      "serviceAccountClientId": "warehouse-service",
+      "realmRoles": [
+        "SERVICE"
+      ]
+    }
+  ]
+}
