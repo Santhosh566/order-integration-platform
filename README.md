@@ -115,7 +115,8 @@ Every signed-in user has a profile (`ProfileService`, Flyway V21 `user_profiles`
   number in a CSV or XML file, is stored as `orderReference`. Each customer can use a reference once,
   so a retried request gets a 409 instead of a second order.
 - Only `orderId`, `customerId`, `items`, `shippingAddress`, `couponCode`, `paymentMethod`
-  (`PREPAID` or `COD`) and `deliverySlot` (`{"date": "2026-11-14", "window": "MORNING"}`) are read
+  (`PREPAID` or `COD`), `deliverySlot` (`{"date": "2026-11-14", "window": "MORNING"}`) and `useWallet`
+  (`true`: the wallet pays what it can, the card the rest; not with COD) are read
   from the request. Status, payment, invoice, carrier and fraud fields are ignored on `/api/orders`
   and refused with a 400 on `/api/orders/validated`. A coupon, COD or slot that does not apply refuses
   the order with a 400 that says why.
@@ -188,6 +189,34 @@ ready; with the booked delivery slot), `IN_TRANSIT` (shipped),
 
 `payment_transactions` keeps every charge and refund. The payment columns on `orders` describe
 only the latest attempt; a DLQ replay starts a new attempt without losing the earlier rows.
+
+## Wallet and gift cards
+
+- **Wallet** (`wallets`, `wallet_transactions`, V25): a customer's store credit, in INR. It never
+  expires, is never paid out as cash and never goes below zero. Every change locks the wallet's row
+  and adds a history row with the balance after it. `GET /api/wallet` gives the balance, `available`
+  (the balance less what orders being paid will take) and the history.
+- **Paying with it:** an order placed with `useWallet: true` gets `walletAmount` = what is available, up
+  to the total, and the card is charged the rest (`cardAmount`). The wallet part is taken at the payment
+  step, with the card's charge and in the same transaction, so an order that fails before payment (out of
+  stock, fraud, a declined card) takes nothing, and a DLQ replay takes it again. When the wallet pays it
+  all, no gateway is called and the order's payment reference is the wallet's (`WAL-…`). If the money was
+  spent elsewhere in the meantime, the card's charge goes back and the order ends `PAYMENT_FAILED`.
+  The wallet cannot be combined with cash on delivery.
+- **Refunds** (cancellations, cancelled items, returns, goodwill) go to the card first; only what the card
+  did not pay goes back to the wallet (`walletRefunded`). Both appear in `payment_transactions`, the
+  wallet's with gateway `WALLET`.
+- **Gift cards** (`gift_cards`): admins issue them in batches (`POST /api/admin/gift-cards`
+  `{amount, count, expiresAt, label}`, ₹10 – ₹10,000 each, up to 500 at a time, valid a year unless
+  given). Only the SHA-256 of each code and its last four characters are stored, so the full codes are
+  in the reply only. `GET /api/admin/gift-cards?status=ACTIVE|REDEEMED|EXPIRED|VOID` lists them;
+  `POST /api/admin/gift-cards/{id}/void {reason}` stops one that is not redeemed yet.
+- A customer redeems a card whole into their wallet: `POST /api/wallet/gift-cards {code}` (spaces,
+  dashes and case do not matter). After 5 wrong codes in an hour (`orders.gift-cards.max-failed-attempts`,
+  `failed-attempts-window-minutes`) every try gets 429 until the hour is up.
+- **Admins** see a customer's wallet at `GET /api/admin/users/{id}/wallet`, give store credit (goodwill,
+  up to ₹25,000 at a time) with `POST …/wallet/credits {amount, note}`, and take back credit given by
+  mistake with `POST …/wallet/debits`. The note shows in the customer's history.
 
 ## Processing orders side by side
 

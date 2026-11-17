@@ -25,13 +25,24 @@ public class PaymentGatewayService {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentGatewayService.class);
 
+    /** Gateway name of money taken from, or given back to, the customer's wallet. */
+    public static final String WALLET = "WALLET";
+
     private final OrderRepository orderRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final WalletService wallets;
 
     public PaymentGatewayService(OrderRepository orderRepository,
-                                 PaymentTransactionRepository paymentTransactionRepository) {
+                                 PaymentTransactionRepository paymentTransactionRepository,
+                                 WalletService wallets) {
         this.orderRepository = orderRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
+        this.wallets = wallets;
+    }
+
+    /** The wallet pays the whole order, so no card is charged. */
+    public boolean paidByWalletAlone(Order order) {
+        return order.getWalletAmount().signum() > 0 && order.cardAmount().signum() == 0;
     }
 
     /**
@@ -40,7 +51,7 @@ public class PaymentGatewayService {
      */
     public PaymentResult chargeStripe(Order order) {
         log.info("[PRIMARY GATEWAY: STRIPE] Attempting authorization for Order: {} (Customer: {}, Amount: {} {})",
-                order.getOrderId(), order.getCustomerId(), order.getTotal(), order.getCurrency());
+                order.getOrderId(), order.getCustomerId(), order.cardAmount(), order.getCurrency());
 
         if (order.getCustomerId() != null && order.getCustomerId().contains("FAIL-STRIPE")) {
             log.error("[PRIMARY STRIPE OUTAGE] Stripe Gateway returned HTTP 503 Service Unavailable / Gateway Timeout!");
@@ -49,7 +60,7 @@ public class PaymentGatewayService {
 
         String txnId = "TXN-STRIPE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         log.info("[PRIMARY STRIPE SUCCESS] Payment approved for Order {}! TxnId: {}", order.getOrderId(), txnId);
-        return PaymentResult.success(order.getOrderId(), txnId, order.getTotal());
+        return PaymentResult.success(order.getOrderId(), txnId, order.cardAmount());
     }
 
     /**
@@ -63,7 +74,7 @@ public class PaymentGatewayService {
         String txnId = "TXN-ADYEN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         log.info("[SECONDARY ADYEN SUCCESS] Backup gateway Adyen approved payment for Order {}! TxnId: {}",
                 order.getOrderId(), txnId);
-        return PaymentResult.success(order.getOrderId(), txnId, order.getTotal());
+        return PaymentResult.success(order.getOrderId(), txnId, order.cardAmount());
     }
 
     /**
@@ -123,11 +134,50 @@ public class PaymentGatewayService {
         return refund;
     }
 
+    /**
+     * Gives the amount back: to the card first, and only what the card did not pay to the wallet. A customer
+     * who paid partly from the wallet and cancels one item gets it back on the card they paid with.
+     *
+     * @return the card's refund record, or the wallet's when nothing went to the card
+     */
     private PaymentTransaction recordRefund(Order order, BigDecimal amount) {
+        BigDecimal toCard = amount.min(order.cardRefundable());
+        BigDecimal toWallet = amount.subtract(toCard);
         order.setRefundedTotal(order.getRefundedTotal().add(amount));
-        return paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.REFUND,
-                order.getPaymentGateway(), "RFD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
-                amount, order.getCurrency()));
+        order.setLastRefundToWallet(toWallet);
+        PaymentTransaction cardRefund = null;
+        if (toCard.signum() > 0) {
+            cardRefund = paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.REFUND,
+                    order.getPaymentGateway(), "RFD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                    toCard, order.getCurrency()));
+        }
+        if (toWallet.signum() <= 0) {
+            return cardRefund;
+        }
+        order.setWalletRefunded(order.getWalletRefunded().add(toWallet));
+        WalletService.Entry entry = wallets.credit(order.getCustomerId(), WalletService.Kind.ORDER_REFUND, toWallet,
+                order.getOrderId(), null, "Refund for order " + order.getOrderId(), null);
+        log.info("[REFUND] {} {} of Order {} back to the wallet ({})", toWallet, order.getCurrency(),
+                order.getOrderId(), entry.reference());
+        PaymentTransaction walletRefund = paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(),
+                PaymentTransaction.Kind.REFUND, WALLET, entry.reference(), toWallet, order.getCurrency()));
+        return cardRefund != null ? cardRefund : walletRefund;
+    }
+
+    /**
+     * Where the latest refund of `amount` went, for the customer's message: " to your original payment
+     * method", " to your wallet", or both with their amounts.
+     */
+    public static String refundDestination(Order order, BigDecimal amount) {
+        BigDecimal toWallet = order.getLastRefundToWallet();
+        if (toWallet.signum() == 0) {
+            return " to your original payment method";
+        }
+        if (toWallet.compareTo(amount) >= 0) {
+            return " to your wallet";
+        }
+        return ": " + Money.format(amount.subtract(toWallet), order.getCurrency()) + " to your original payment method and "
+                + Money.format(toWallet, order.getCurrency()) + " to your wallet";
     }
 
     /**
@@ -164,9 +214,54 @@ public class PaymentGatewayService {
      * Puts a successful charge on the order and in the payment history. The caller holds the order's row lock.
      */
     public void recordCharge(Order order, PaymentResult payment) {
+        if (payment == null) {
+            // Paid by the wallet alone: recordWalletPayment gives the order its payment reference
+            return;
+        }
         order.setPaymentTransactionId(payment.getTransactionId());
         order.setPaymentGateway(payment.getTransactionId().startsWith("TXN-ADYEN") ? "ADYEN" : "STRIPE");
         paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.CHARGE,
                 order.getPaymentGateway(), payment.getTransactionId(), payment.getAmount(), order.getCurrency()));
+    }
+
+    /**
+     * Takes the order's wallet part from the customer's wallet, in the same transaction as the card's charge
+     * is recorded. An order paid by the wallet alone takes the wallet's reference as its payment reference.
+     *
+     * @throws WalletService.InsufficientBalanceException when the wallet was spent elsewhere after checkout
+     */
+    public void recordWalletPayment(Order order) {
+        if (order.getWalletAmount().signum() == 0) {
+            return;
+        }
+        WalletService.Entry entry = wallets.debit(order.getCustomerId(), WalletService.Kind.ORDER_PAYMENT,
+                order.getWalletAmount(), order.getOrderId(), "Paid for order " + order.getOrderId(), null);
+        if (order.getPaymentTransactionId() == null) {
+            order.setPaymentTransactionId(entry.reference());
+            order.setPaymentGateway(WALLET);
+        }
+        paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.CHARGE,
+                WALLET, entry.reference(), order.getWalletAmount(), order.getCurrency()));
+        log.info("[PAYMENT] {} {} of Order {} paid from the wallet ({})", order.getWalletAmount(), order.getCurrency(),
+                order.getOrderId(), entry.reference());
+    }
+
+    /**
+     * The card was charged but the order cannot go on (cancelled during the charge, or the wallet no longer
+     * covers its part), and the wallet was not touched: the card's charge alone goes back, and the order is
+     * marked refunded so nothing is given back twice. A dead letter replay starts the payment afresh.
+     */
+    public void refundCardCharge(Order order, PaymentResult payment) {
+        if (payment == null) {
+            return;
+        }
+        recordCharge(order, payment);
+        log.warn("[REFUND] Refunding the card's {} {} for Order {} (Transaction: {})", payment.getAmount(),
+                order.getCurrency(), order.getOrderId(), payment.getTransactionId());
+        order.setRefundedTotal(order.getRefundedTotal().add(payment.getAmount()));
+        paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.REFUND,
+                order.getPaymentGateway(), "RFD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
+                payment.getAmount(), order.getCurrency()));
+        order.setRefundedAt(LocalDateTime.now());
     }
 }

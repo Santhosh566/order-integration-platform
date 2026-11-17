@@ -117,6 +117,7 @@ public class CheckoutService {
             Order.DeliveryWindow.EVENING, "5 PM – 9 PM");
 
     private final JdbcTemplate jdbc;
+    private final WalletService wallets;
     private final CouponTargets targets;
     private final DeliveryEstimator estimator;
     private final BigDecimal codMaxOrderValue;
@@ -124,12 +125,13 @@ public class CheckoutService {
     private final int slotCapacity;
     private final int slotDays;
 
-    public CheckoutService(JdbcTemplate jdbc, CouponTargets targets, DeliveryEstimator estimator,
+    public CheckoutService(JdbcTemplate jdbc, WalletService wallets, CouponTargets targets, DeliveryEstimator estimator,
                            @Value("${orders.checkout.cod-max-order-value:50000}") BigDecimal codMaxOrderValue,
                            @Value("${orders.checkout.cod-refusals-allowed:2}") int codRefusalsAllowed,
                            @Value("${orders.checkout.slot-capacity:40}") int slotCapacity,
                            @Value("${orders.checkout.slot-days:6}") int slotDays) {
         this.jdbc = jdbc;
+        this.wallets = wallets;
         this.targets = targets;
         this.estimator = estimator;
         this.codMaxOrderValue = Money.of(codMaxOrderValue);
@@ -423,10 +425,11 @@ public class CheckoutService {
     }
 
     /**
-     * After pricing, as the order is placed: checks the payment method and books the slot.
+     * After pricing, as the order is placed: sets what the wallet pays, checks the payment method and books the slot.
      * Runs inside the order's transaction, so the slot's lock is held until the order is saved.
      */
     public void checkOptions(@Body Order order) {
+        wallets.applyToOrder(order);
         if (order.isCashOnDelivery()) {
             CashOnDelivery cod = cashOnDelivery(order.getCustomerId(), order.getTotal());
             if (!cod.available()) {

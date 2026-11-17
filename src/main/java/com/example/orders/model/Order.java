@@ -180,6 +180,24 @@ public class Order {
     @Column(name = "cancelled_total", nullable = false)
     private BigDecimal cancelledTotal = Money.ZERO;
 
+    // Paid from the customer's wallet, taken with the card at the payment step; the card pays the rest
+    @Column(name = "wallet_amount", nullable = false)
+    private BigDecimal walletAmount = Money.ZERO;
+
+    // The part of refundedTotal that went back to the wallet (refunds go to the card first)
+    @Column(name = "wallet_refunded", nullable = false)
+    private BigDecimal walletRefunded = Money.ZERO;
+
+    // How much of the latest refund went to the wallet, for the message to the customer. Not stored.
+    @jakarta.persistence.Transient
+    @JsonIgnore
+    private BigDecimal lastRefundToWallet = Money.ZERO;
+
+    // The customer asked to pay from the wallet; checkout turns it into walletAmount. Not stored.
+    @jakarta.persistence.Transient
+    @JsonIgnore
+    private boolean walletRequested;
+
     // ── Returns ──────────────────────────────────────────────────────────────
     public enum ReturnStatus { NONE, PARTIAL, FULL }
 
@@ -351,6 +369,34 @@ public class Order {
     @com.fasterxml.jackson.annotation.JsonProperty(value = "amountDue", access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
     public BigDecimal amountDue() {
         return total.subtract(cancelledTotal);
+    }
+
+    public BigDecimal getWalletAmount() { return walletAmount; }
+    public void setWalletAmount(BigDecimal walletAmount) { this.walletAmount = Money.of(walletAmount); }
+
+    @JsonIgnore
+    public BigDecimal getLastRefundToWallet() { return lastRefundToWallet; }
+    public void setLastRefundToWallet(BigDecimal lastRefundToWallet) { this.lastRefundToWallet = Money.of(lastRefundToWallet); }
+
+    @JsonIgnore
+    public boolean isWalletRequested() { return walletRequested; }
+    public void setWalletRequested(boolean walletRequested) { this.walletRequested = walletRequested; }
+
+    public BigDecimal getWalletRefunded() { return walletRefunded; }
+    public void setWalletRefunded(BigDecimal walletRefunded) { this.walletRefunded = Money.of(walletRefunded); }
+
+    /** What the card (or UPI) is charged: the total less what the wallet pays. */
+    @JsonProperty(value = "cardAmount", access = JsonProperty.Access.READ_ONLY)
+    public BigDecimal cardAmount() {
+        return total.subtract(walletAmount);
+    }
+
+    /**
+     * What a refund can still send to the card. Refunds go to the card first, so the wallet gets back
+     * only the part the card did not pay.
+     */
+    public BigDecimal cardRefundable() {
+        return cardAmount().subtract(refundedTotal.subtract(walletRefunded)).max(Money.ZERO);
     }
 
     public BigDecimal getCancelledTotal() { return cancelledTotal; }

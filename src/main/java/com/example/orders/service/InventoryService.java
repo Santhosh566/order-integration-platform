@@ -158,14 +158,24 @@ public class InventoryService {
     @Transactional
     public boolean confirmPayment(String orderId, PaymentResult payment) {
         Order order = orderStateService.lock(orderId);
-        paymentGatewayService.recordCharge(order, payment);
-
         if (order.getStatus() != OrderStatus.INVENTORY_RESERVED) {
             log.warn("[PAYMENT] Order {} became {} during the charge. Refunding.", orderId, order.getStatus());
-            paymentGatewayService.issueRefund(order);
+            // The wallet part was not taken yet, so only the card's charge goes back
+            paymentGatewayService.refundCardCharge(order, payment);
             orderRepository.save(order);
             return false;
         }
+        // The wallet part is taken now, with the card's charge, so an order that never got this far took nothing
+        try {
+            paymentGatewayService.recordWalletPayment(order);
+        } catch (WalletService.InsufficientBalanceException e) {
+            log.warn("[PAYMENT] Order {}: the wallet no longer covers {} ({}). Refunding the card and failing the payment.",
+                    orderId, order.getWalletAmount(), e.getMessage());
+            paymentGatewayService.refundCardCharge(order, payment);
+            releaseReserved(orderId);
+            return false;
+        }
+        paymentGatewayService.recordCharge(order, payment);
         orderStateService.moveTo(order, OrderStatus.CONFIRMED);
         return true;
     }
@@ -303,6 +313,7 @@ public class InventoryService {
             order.setPaymentGateway(null);
             order.setRefundedAt(null);
             order.setRefundedTotal(java.math.BigDecimal.ZERO);
+            order.setWalletRefunded(java.math.BigDecimal.ZERO);
             order.setRecoveryAttempts(0);
             order.setLastRecoveryAt(null);
             orderStateService.moveTo(order, OrderStatus.PENDING);

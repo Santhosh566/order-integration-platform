@@ -287,16 +287,24 @@ public class OrderProcessingRoute extends RouteBuilder {
             .routeId("charge-online")
             .errorHandler(noErrorHandler())
             .log(LoggingLevel.INFO,
-                 "[SAGA: STEP 2 - PAYMENT] Initiating payment for Order ${exchangeProperty.currentOrderId} (${exchangeProperty.currentOrder.currency} ${exchangeProperty.currentOrder.total})...")
+                 "[SAGA: STEP 2 - PAYMENT] Initiating payment for Order ${exchangeProperty.currentOrderId} (${exchangeProperty.currentOrder.currency} ${exchangeProperty.currentOrder.total}, wallet ${exchangeProperty.currentOrder.walletAmount})...")
 
-            // Phase 2.3: Throttler EIP — rate limits payment gateway calls to max 20 requests/second
-            .throttle(20).timePeriodMillis(1000)
+            .choice()
+                // The wallet pays it all: no card to charge, confirmPayment takes the wallet part
+                .when(method(PaymentGatewayService.class, "paidByWalletAlone(${exchangeProperty.currentOrder})"))
+                    .log(LoggingLevel.INFO,
+                         "[SAGA: STEP 2 - PAYMENT] Order ${exchangeProperty.currentOrderId} is paid from the wallet alone")
+                    .setBody(constant(null))
+                .otherwise()
+                    // Phase 2.3: Throttler EIP — rate limits payment gateway calls to max 20 requests/second
+                    .throttle(20).timePeriodMillis(1000)
 
-            // Phase 2.2: Load Balancer with Failover EIP
-            // Always attempts Primary (Stripe) first; fails over to Secondary (Adyen) only on outage
-            .loadBalance().failover(1, false, false)
-                .to("direct:stripePaymentGateway")
-                .to("direct:adyenPaymentGateway")
+                    // Phase 2.2: Load Balancer with Failover EIP
+                    // Always attempts Primary (Stripe) first; fails over to Secondary (Adyen) only on outage
+                    .loadBalance().failover(1, false, false)
+                        .to("direct:stripePaymentGateway")
+                        .to("direct:adyenPaymentGateway")
+                    .end()
             .end()
 
             .log(LoggingLevel.INFO,

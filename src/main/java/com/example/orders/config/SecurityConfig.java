@@ -73,6 +73,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/wishlist", "/api/wishlist/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/reviews", "/api/reviews/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/checkout/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/wallet", "/api/wallet/**").hasRole("CUSTOMER")
                 // Views and clicks on shop banners: shoppers only, so staff browsing does not skew the counts
                 .requestMatchers(HttpMethod.POST, "/api/promotions/*/view", "/api/promotions/*/click").hasRole("CUSTOMER")
                 .requestMatchers("/api/delivery-ratings/**").hasRole("CUSTOMER")

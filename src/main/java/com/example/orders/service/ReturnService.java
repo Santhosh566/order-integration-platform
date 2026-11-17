@@ -257,7 +257,7 @@ public class ReturnService {
         order.setReturnStatus(allUnitsReturned(order, credited) ? Order.ReturnStatus.FULL : Order.ReturnStatus.PARTIAL);
         tell(order, "Refund for your return " + ret.getReturnId(),
                 "We received your return of " + describe(ret.getItems()) + " and refunded "
-                        + Money.format(note.getTotal(), note.getCurrency()) + refundRoute(order)
+                        + Money.format(note.getTotal(), note.getCurrency()) + refundRoute(order, note.getTotal())
                         + "Credit note: " + note.getNumber() + ".");
         log.info("[RETURNS] {} received {} for order {}: refunded {} {} (credit note {})", actor, returnId,
                 order.getOrderId(), note.getCurrency(), note.getTotal(), note.getNumber());
@@ -325,12 +325,12 @@ public class ReturnService {
         return note;
     }
 
-    /** Where the money goes back: the card or UPI it came from, or, for cash paid at the door, a bank transfer. */
-    private static String refundRoute(Order order) {
+    /** Where the money goes back: the card or UPI it came from (then the wallet, for what it paid), or, for cash paid at the door, a bank transfer. */
+    private static String refundRoute(Order order, java.math.BigDecimal amount) {
         return order.isCashOnDelivery()
                 ? ". You paid in cash on delivery, so it comes by bank transfer or UPI: reply to this email with your "
                         + "account details if we do not have them yet. "
-                : " to your original payment method. ";
+                : PaymentGatewayService.refundDestination(order, amount) + ". ";
     }
 
     // ── Amounts ────────────────────────────────────────────────────────────────

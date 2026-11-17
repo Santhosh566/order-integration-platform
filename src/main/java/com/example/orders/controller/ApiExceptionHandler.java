@@ -46,6 +46,11 @@ public class ApiExceptionHandler {
         return reply(HttpStatus.CONTENT_TOO_LARGE, "TOO_LARGE", "The file is too large; uploads may be at most 30 MB (pictures 5 MB)");
     }
 
+    @ExceptionHandler(com.example.orders.exception.TooManyAttemptsException.class)
+    public ResponseEntity<Map<String, String>> tooMany(com.example.orders.exception.TooManyAttemptsException e) {
+        return reply(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_ATTEMPTS", e.getMessage());
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> missing(NotFoundException e) {
         return reply(HttpStatus.NOT_FOUND, "NOT_FOUND", e.getMessage());

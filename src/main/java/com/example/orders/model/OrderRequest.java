@@ -21,6 +21,8 @@ public class OrderRequest {
     private String couponCode;
     private Order.PaymentMethod paymentMethod;
     private DeliverySlot deliverySlot;
+    // Pay as much as the wallet holds, and the rest by card
+    private Boolean useWallet;
 
     /** A booked delivery: the day (ISO date) and the window. */
     public record DeliverySlot(java.time.LocalDate date, Order.DeliveryWindow window) {}
@@ -43,6 +45,9 @@ public class OrderRequest {
     public Order.PaymentMethod getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(Order.PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
 
+    public Boolean getUseWallet() { return useWallet; }
+    public void setUseWallet(Boolean useWallet) { this.useWallet = useWallet; }
+
     public DeliverySlot getDeliverySlot() { return deliverySlot; }
     public void setDeliverySlot(DeliverySlot deliverySlot) { this.deliverySlot = deliverySlot; }
 
@@ -58,6 +63,7 @@ public class OrderRequest {
         // Checked by CheckoutService; a coupon or slot that does not apply refuses the order
         order.setCouponCode(couponCode == null || couponCode.isBlank() ? null : couponCode.strip().toUpperCase(java.util.Locale.ROOT));
         order.setPaymentMethod(paymentMethod);
+        order.setWalletRequested(Boolean.TRUE.equals(useWallet));
         if (deliverySlot != null && (deliverySlot.date() != null || deliverySlot.window() != null)) {
             order.setDeliveryDate(deliverySlot.date());
             order.setDeliveryWindow(deliverySlot.window());

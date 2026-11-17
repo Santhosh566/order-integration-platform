@@ -194,7 +194,8 @@ public class PartialCancelService {
                 "Items cancelled from order " + orderId,
                 "We cancelled " + describe(picked) + " from order " + orderId + ". "
                         + (refunded != null
-                            ? Money.format(refunded, order.getCurrency()) + " is being refunded to your original payment method. "
+                            ? Money.format(refunded, order.getCurrency()) + " is being refunded"
+                                    + PaymentGatewayService.refundDestination(order, refunded) + ". "
                             : "You now pay " + Money.format(order.amountDue(), order.getCurrency()) + " in cash on delivery. ")
                         + "Credit note: " + saved.getNumber() + ". The rest of your order is on its way as planned."));
         log.info("[PARTIAL CANCEL] {} cancelled {} from order {}: credit note {} for {} {}{}", actor, describe(picked),
