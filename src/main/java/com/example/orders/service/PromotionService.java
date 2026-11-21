@@ -281,7 +281,7 @@ public class PromotionService {
             }
             case COUPON -> {
                 coupon = r.couponCode() == null ? "" : r.couponCode().strip().toUpperCase(Locale.ROOT);
-                if (count("select count(*) from coupons where code = ?", coupon) == 0) {
+                if (count("select count(*) from coupons where code = ? and customer_id is null", coupon) == 0) {
                     throw new InvalidOrderException("No coupon " + (coupon.isEmpty() ? "chosen" : coupon));
                 }
             }

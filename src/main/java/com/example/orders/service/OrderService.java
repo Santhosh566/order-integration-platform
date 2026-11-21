@@ -33,19 +33,22 @@ public class OrderService {
     private final OrderStateService orderStateService;
     private final CustomerService customerService;
     private final ApplicationEventPublisher eventPublisher;
+    private final CartService carts;
 
     public OrderService(OrderRepository orderRepository,
                         OutboxEventRepository outboxEventRepository,
                         InventoryService inventoryService,
                         OrderStateService orderStateService,
                         CustomerService customerService,
-                        ApplicationEventPublisher eventPublisher) {
+                        ApplicationEventPublisher eventPublisher,
+                        CartService carts) {
         this.orderRepository       = orderRepository;
         this.outboxEventRepository = outboxEventRepository;
         this.inventoryService      = inventoryService;
         this.orderStateService     = orderStateService;
         this.customerService       = customerService;
         this.eventPublisher        = eventPublisher;
+        this.carts                 = carts;
     }
 
     /**
@@ -74,6 +77,10 @@ public class OrderService {
         // Write the outbox row in the SAME transaction
         OutboxEvent event = OutboxEvent.from(savedOrder);
         outboxEventRepository.save(event);
+
+        // The ordered products leave the customer's cart; the order row must exist first (carts.order_id)
+        orderRepository.flush();
+        carts.orderPlaced(savedOrder);
 
         eventPublisher.publishEvent(new OrderStatusChanged(savedOrder));
         return savedOrder;

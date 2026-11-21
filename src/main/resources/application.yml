@@ -151,6 +151,22 @@ orders:
     slot-capacity: ${ORDERS_SLOT_CAPACITY:40}
     # Delivery days a customer can choose from, starting at the standard delivery date
     slot-days: 6
+  cart:
+    # How often the reminder job looks for carts left without an order
+    reminder-poll-ms: ${ORDERS_CART_REMINDER_POLL_MS:600000}
+    # Reminders, timed from the customer's last change to the cart; empty turns reminders off
+    reminder-after: ${ORDERS_CART_REMINDER_AFTER:PT1H,PT24H}
+    # The last reminder carries a personal coupon: this percent off, at most this much, for this long
+    coupon-percent: ${ORDERS_CART_COUPON_PERCENT:5}
+    coupon-max-discount: 500
+    coupon-valid-for: PT48H
+    # A customer gets a reminder coupon at most once in this time, so leaving carts is not a way to discount
+    coupon-once-every: P30D
+    # No reminder emails at night (India time); the same time twice turns this off
+    quiet-from: "21:00"
+    quiet-until: "09:00"
+    # A cart nobody touched for this long is closed
+    expire-after: P30D
   delivery:
     # true: a timer delivers dispatched orders by itself (development stand-in)
     # false: delivery users take, pick up and deliver orders (see DeliveryService)

@@ -46,7 +46,8 @@ public class ProfileService {
     private static final Pattern UPI = Pattern.compile("[A-Za-z0-9._-]{2,256}@[A-Za-z][A-Za-z0-9]{1,63}");
     private static final int MIN_AGE = 18;
 
-    public record CustomerPart(LocalDate dateOfBirth, Gender gender) {}
+    /** @param cartReminders emails about a cart left without ordering; null on an update keeps it */
+    public record CustomerPart(LocalDate dateOfBirth, Gender gender, Boolean cartReminders) {}
 
     public record DriverPart(VehicleType vehicleType, String vehicleNumber, String licenceNumber,
                              String emergencyContactName, String emergencyContactPhone, String upiId) {}
@@ -111,6 +112,9 @@ public class ProfileService {
             CustomerPart part = update.customer();
             profile.setDateOfBirth(birthday(part.dateOfBirth()));
             profile.setGender(part.gender());
+            if (part.cartReminders() != null) {
+                profile.setCartReminders(part.cartReminders());
+            }
         }
         if (roles.contains(Role.DELIVERY) && update.driver() != null) {
             applyDriver(profile, update.driver(), phone);
@@ -238,7 +242,7 @@ public class ProfileService {
         UserProfile p = profile != null ? profile : new UserProfile(user.getUserId());
         return new Profile(user.getUserId(), user.getEmail(), roles, user.getFullName(), user.getPhone(),
                 p.getPhotoKey() != null, p.getPhotoUpdatedAt(), user.getCreatedAt(),
-                roles.contains(Role.CUSTOMER) ? new CustomerPart(p.getDateOfBirth(), p.getGender()) : null,
+                roles.contains(Role.CUSTOMER) ? new CustomerPart(p.getDateOfBirth(), p.getGender(), p.isCartReminders()) : null,
                 roles.contains(Role.DELIVERY) ? new DriverPart(p.getVehicleType(), p.getVehicleNumber(),
                         p.getLicenceNumber(), p.getEmergencyContactName(), p.getEmergencyContactPhone(), p.getUpiId()) : null,
                 roles.contains(Role.ADMIN) ? new StaffPart(p.getJobTitle(), p.getDepartment()) : null);

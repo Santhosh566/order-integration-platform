@@ -54,17 +54,20 @@ public class CheckoutService {
 
     public enum DiscountType { PERCENT, FLAT }
 
-    /** @param appliesTo the products and categories it is for; empty for the whole order */
+    /**
+     * @param customerId the one customer who may use it (a cart reminder's coupon), or null for everyone
+     * @param appliesTo  the products and categories it is for; empty for the whole order
+     */
     public record Coupon(String code, String description, DiscountType discountType, BigDecimal discountValue,
                          BigDecimal maxDiscount, BigDecimal minOrderValue, LocalDateTime startsAt, LocalDateTime endsAt,
                          Integer usageLimit, int perCustomerLimit, boolean firstOrderOnly, boolean active,
                          LocalDateTime createdAt, String createdBy, LocalDateTime updatedAt, String updatedBy,
-                         int used, List<CouponTargets.Target> appliesTo) {
+                         int used, String customerId, List<CouponTargets.Target> appliesTo) {
 
         Coupon withTargets(List<CouponTargets.Target> targets) {
             return new Coupon(code, description, discountType, discountValue, maxDiscount, minOrderValue, startsAt,
                     endsAt, usageLimit, perCustomerLimit, firstOrderOnly, active, createdAt, createdBy, updatedAt, updatedBy, used,
-                    List.copyOf(targets));
+                    customerId, List.copyOf(targets));
         }
 
         /** For the whole order, or only for some products. */
@@ -164,7 +167,9 @@ public class CheckoutService {
         }
         List<Coupon> found = jdbc.query(COUPON + "where c.code = ?", COUPON_ROW, code);
         Coupon coupon = found.isEmpty() ? null : found.get(0);
-        if (coupon == null || !coupon.active()) {
+        // Someone else's personal coupon answers like one that does not exist
+        if (coupon == null || !coupon.active()
+                || coupon.customerId() != null && !coupon.customerId().equals(order.getCustomerId())) {
             throw new CouponException("Coupon " + code + " is not valid");
         }
         LocalDateTime now = LocalDateTime.now();
@@ -247,7 +252,13 @@ public class CheckoutService {
     /** Coupons the customer can use now, best first; the shop shows them at checkout. */
     public List<Offer> offers(String customerId) {
         List<Offer> offers = new ArrayList<>();
-        for (Coupon c : liveCoupons()) {
+        // The customer's own coupons (from a cart reminder) first
+        List<Coupon> live = new ArrayList<>(withTargets(jdbc.query(COUPON + "where c.customer_id = ? and c.active "
+                + "and (c.starts_at is null or c.starts_at <= now()) and (c.ends_at is null or c.ends_at > now()) "
+                + "order by c.ends_at, c.code", COUPON_ROW, customerId)).stream()
+                .filter(c -> c.usageLimit() == null || c.used() < c.usageLimit()).toList());
+        live.addAll(liveCoupons());
+        for (Coupon c : live) {
             int mine = count("select count(*) from orders where coupon_code = ? and customer_id = ? and deleted_at is null "
                     + "and status not in (" + UNFULFILLED + ")", c.code(), customerId);
             if (mine >= c.perCustomerLimit()) {
@@ -265,17 +276,18 @@ public class CheckoutService {
 
     /**
      * Coupons anyone could use now: on, inside their dates, and not used up. Per-customer limits are not
-     * checked here. Cheapest to reach first.
+     * checked here, and personal coupons are left out. Cheapest to reach first.
      */
     public List<Coupon> liveCoupons() {
-        return withTargets(jdbc.query(COUPON + "where c.active and (c.starts_at is null or c.starts_at <= now()) "
+        return withTargets(jdbc.query(COUPON + "where c.customer_id is null and c.active and (c.starts_at is null or c.starts_at <= now()) "
                 + "and (c.ends_at is null or c.ends_at > now()) order by c.min_order_value, c.code", COUPON_ROW).stream()
                 .filter(c -> c.usageLimit() == null || c.used() < c.usageLimit())
                 .toList());
     }
 
+    /** The coupons an admin manages; personal ones are made and ended by the cart reminders. */
     public List<Coupon> coupons() {
-        return withTargets(jdbc.query(COUPON + "order by c.active desc, c.created_at desc", COUPON_ROW));
+        return withTargets(jdbc.query(COUPON + "where c.customer_id is null order by c.active desc, c.created_at desc", COUPON_ROW));
     }
 
     private List<Coupon> withTargets(List<Coupon> coupons) {
@@ -533,7 +545,7 @@ public class CheckoutService {
             (Integer) rs.getObject("usage_limit"), rs.getInt("per_customer_limit"), rs.getBoolean("first_order_only"),
             rs.getBoolean("active"), time(rs.getTimestamp("created_at")), rs.getString("created_by"),
             time(rs.getTimestamp("updated_at")), rs.getString("updated_by"), rs.getInt("used"),
-            List.of());
+            rs.getString("customer_id"), List.of());
 
     private static LocalDateTime time(java.sql.Timestamp t) {
         return t == null ? null : t.toLocalDateTime();

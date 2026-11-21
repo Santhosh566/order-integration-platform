@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/orders", "/api/orders/**", "/api/invoices/**").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers("/api/returns", "/api/returns/**").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers("/api/wishlist", "/api/wishlist/**").hasRole("CUSTOMER")
+                .requestMatchers("/api/cart", "/api/cart/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/reviews", "/api/reviews/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/checkout/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/wallet", "/api/wallet/**").hasRole("CUSTOMER")

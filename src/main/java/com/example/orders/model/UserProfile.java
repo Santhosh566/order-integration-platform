@@ -69,6 +69,10 @@ public class UserProfile {
 
     private String department;
 
+    /** Customers: emails about a cart they left, with its offers. Order emails go out regardless. */
+    @Column(name = "cart_reminders", nullable = false)
+    private boolean cartReminders = true;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
@@ -91,6 +95,9 @@ public class UserProfile {
 
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+    public boolean isCartReminders() { return cartReminders; }
+    public void setCartReminders(boolean cartReminders) { this.cartReminders = cartReminders; }
 
     public Gender getGender() { return gender; }
     public void setGender(Gender gender) { this.gender = gender; }
