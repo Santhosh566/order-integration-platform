@@ -67,6 +67,10 @@ public class OrderItem {
     @Column(name = "line_total", nullable = false)
     private BigDecimal lineTotal = Money.ZERO;
 
+    // Set on a line added after the order was placed (OrderChangeService); null on the lines ordered
+    @Column(name = "added_at")
+    private java.time.LocalDateTime addedAt;
+
     public OrderItem() {}
 
     public OrderItem(String sku, int quantity, BigDecimal price) {
@@ -140,6 +144,9 @@ public class OrderItem {
 
     public BigDecimal getIgstAmount() { return igstAmount; }
     public void setIgstAmount(BigDecimal igstAmount) { this.igstAmount = Money.of(igstAmount); }
+
+    public java.time.LocalDateTime getAddedAt() { return addedAt; }
+    public void setAddedAt(java.time.LocalDateTime addedAt) { this.addedAt = addedAt; }
 
     public BigDecimal getLineTotal() { return lineTotal; }
     public void setLineTotal(BigDecimal lineTotal) { this.lineTotal = Money.of(lineTotal); }

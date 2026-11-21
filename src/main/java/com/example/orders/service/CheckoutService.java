@@ -411,7 +411,7 @@ public class CheckoutService {
         }
         IndianState state = estimate.deliveryState();
         List<LocalDate> days = bookableDays(estimate);
-        Map<String, Integer> booked = bookings(days, state);
+        Map<String, Integer> booked = bookings(days, state, null);
         List<SlotDay> result = new ArrayList<>();
         for (LocalDate day : days) {
             List<Window> windows = new ArrayList<>();
@@ -436,31 +436,50 @@ public class CheckoutService {
                 throw new InvalidOrderException(cod.reason());
             }
         }
-        if (order.getDeliveryDate() == null && order.getDeliveryWindow() == null) {
+        checkSlot(order.getShippingAddress(), order.getDeliveryDate(), order.getDeliveryWindow(), null);
+    }
+
+    /**
+     * Checks that a slot can be booked for an address and takes the slot's lock until the transaction ends.
+     * Both null is standard delivery, which is always allowed.
+     *
+     * @param excludeOrderId an order whose own booking is not counted (it is moving to this slot, or keeping it);
+     *                       null for a new order
+     */
+    public void checkSlot(com.example.orders.model.ShippingAddress address, LocalDate date, Order.DeliveryWindow window,
+                          String excludeOrderId) {
+        if (date == null && window == null) {
             return;
         }
-        if (order.getDeliveryDate() == null || order.getDeliveryWindow() == null) {
+        if (date == null || window == null) {
             throw new InvalidOrderException("A delivery slot needs both a day and a time");
         }
-        String pin = order.getShippingAddress() == null ? null : order.getShippingAddress().getPostalCode();
+        String pin = address == null ? null : address.getPostalCode();
         DeliveryEstimator.Estimate estimate = estimator.estimate(pin, true);
         if (estimate.outcome() != DeliveryEstimator.Outcome.DELIVERABLE || estimate.deliveryState() == null) {
             throw new InvalidOrderException("A delivery day cannot be booked for PIN " + pin);
         }
         IndianState state = estimate.deliveryState();
-        if (!bookableDays(estimate).contains(order.getDeliveryDate())) {
-            throw new InvalidOrderException("Delivery on " + order.getDeliveryDate() + " can no longer be booked. "
+        if (!bookableDays(estimate).contains(date)) {
+            throw new InvalidOrderException("Delivery on " + date + " can no longer be booked. "
                     + "Choose another day, or standard delivery.");
         }
         // One order at a time per window and region, until this transaction ends
-        jdbc.queryForList("select pg_advisory_xact_lock(hashtext(?))", "slot|" + order.getDeliveryDate() + "|"
-                + order.getDeliveryWindow() + "|" + state.region());
-        int booked = bookings(List.of(order.getDeliveryDate()), state)
-                .getOrDefault(order.getDeliveryDate() + "|" + order.getDeliveryWindow(), 0);
+        jdbc.queryForList("select pg_advisory_xact_lock(hashtext(?))", "slot|" + date + "|" + window + "|" + state.region());
+        int booked = bookings(List.of(date), state, excludeOrderId).getOrDefault(date + "|" + window, 0);
         if (booked >= slotCapacity) {
-            throw new InvalidOrderException("The " + WINDOW_LABELS.get(order.getDeliveryWindow()) + " slot on "
-                    + order.getDeliveryDate() + " has just filled up. Choose another.");
+            throw new InvalidOrderException("The " + WINDOW_LABELS.get(window) + " slot on " + date
+                    + " has just filled up. Choose another.");
         }
+    }
+
+    /** "Fri 21 Nov, 9 AM – 1 PM", or "Standard delivery" without a slot. */
+    public static String describeSlot(LocalDate date, Order.DeliveryWindow window) {
+        if (date == null || window == null) {
+            return "Standard delivery";
+        }
+        return date.format(java.time.format.DateTimeFormatter.ofPattern("EEE d MMM", Locale.ENGLISH)) + ", "
+                + WINDOW_LABELS.get(window);
     }
 
     private List<LocalDate> bookableDays(DeliveryEstimator.Estimate estimate) {
@@ -469,7 +488,7 @@ public class CheckoutService {
     }
 
     /** Live orders booked per "day|window" in the state's delivery region. */
-    private Map<String, Integer> bookings(List<LocalDate> days, IndianState state) {
+    private Map<String, Integer> bookings(List<LocalDate> days, IndianState state, String excludeOrderId) {
         if (days.isEmpty()) {
             return Map.of();
         }
@@ -479,9 +498,10 @@ public class CheckoutService {
         String codeMarks = regionCodes.stream().map(c -> "?").collect(Collectors.joining(", "));
         List<Object> args = new ArrayList<>(days);
         args.addAll(regionCodes);
+        args.add(excludeOrderId == null ? "" : excludeOrderId);
         Map<String, Integer> counts = new java.util.HashMap<>();
         jdbc.query("select delivery_date, delivery_window, count(*) as n from orders where delivery_date in (" + dayMarks + ") "
-                + "and place_of_supply in (" + codeMarks + ") and deleted_at is null and status not in (" + UNFULFILLED + ") "
+                + "and place_of_supply in (" + codeMarks + ") and order_id <> ? and deleted_at is null and status not in (" + UNFULFILLED + ") "
                 + "group by delivery_date, delivery_window", rs -> {
             counts.put(rs.getObject("delivery_date", LocalDate.class) + "|" + rs.getString("delivery_window"), rs.getInt("n"));
         }, args.toArray());

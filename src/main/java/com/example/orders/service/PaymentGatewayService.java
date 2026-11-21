@@ -50,8 +50,12 @@ public class PaymentGatewayService {
      * Simulates gateway outage when customerId contains 'FAIL-STRIPE'.
      */
     public PaymentResult chargeStripe(Order order) {
+        return authorizeStripe(order, order.cardAmount());
+    }
+
+    private PaymentResult authorizeStripe(Order order, BigDecimal amount) {
         log.info("[PRIMARY GATEWAY: STRIPE] Attempting authorization for Order: {} (Customer: {}, Amount: {} {})",
-                order.getOrderId(), order.getCustomerId(), order.cardAmount(), order.getCurrency());
+                order.getOrderId(), order.getCustomerId(), amount, order.getCurrency());
 
         if (order.getCustomerId() != null && order.getCustomerId().contains("FAIL-STRIPE")) {
             log.error("[PRIMARY STRIPE OUTAGE] Stripe Gateway returned HTTP 503 Service Unavailable / Gateway Timeout!");
@@ -60,7 +64,7 @@ public class PaymentGatewayService {
 
         String txnId = "TXN-STRIPE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         log.info("[PRIMARY STRIPE SUCCESS] Payment approved for Order {}! TxnId: {}", order.getOrderId(), txnId);
-        return PaymentResult.success(order.getOrderId(), txnId, order.cardAmount());
+        return PaymentResult.success(order.getOrderId(), txnId, amount);
     }
 
     /**
@@ -68,13 +72,62 @@ public class PaymentGatewayService {
      * Invoked automatically by Camel Failover Load Balancer when Stripe fails.
      */
     public PaymentResult chargeAdyen(Order order) {
+        return authorizeAdyen(order, order.cardAmount());
+    }
+
+    private PaymentResult authorizeAdyen(Order order, BigDecimal amount) {
         log.warn("[SECONDARY GATEWAY FAILOVER: ADYEN] Primary Stripe failed! Failover Load Balancer routing to Adyen for Order: {}",
                 order.getOrderId());
 
         String txnId = "TXN-ADYEN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         log.info("[SECONDARY ADYEN SUCCESS] Backup gateway Adyen approved payment for Order {}! TxnId: {}",
                 order.getOrderId(), txnId);
-        return PaymentResult.success(order.getOrderId(), txnId, order.cardAmount());
+        return PaymentResult.success(order.getOrderId(), txnId, amount);
+    }
+
+    /**
+     * Charges more on an order already paid, for items added after it was placed: the card first with Stripe,
+     * and Adyen when Stripe is down, as the payment step does. The caller holds the order's row lock and calls
+     * this last, after every other check, so a refusal later cannot leave the customer charged.
+     *
+     * @return the charge's payment record
+     */
+    public PaymentTransaction chargeExtra(Order order, BigDecimal amount) {
+        if (!Money.isPositive(amount)) {
+            throw new IllegalArgumentException("An extra charge must be more than zero");
+        }
+        PaymentResult result;
+        try {
+            result = authorizeStripe(order, amount);
+        } catch (IllegalStateException stripeDown) {
+            result = authorizeAdyen(order, amount);
+        }
+        String gateway = gatewayOf(result.getTransactionId());
+        if (order.getPaymentGateway() == null || WALLET.equals(order.getPaymentGateway())) {
+            // The wallet paid it all before: card refunds now go back through this gateway
+            order.setPaymentGateway(gateway);
+        }
+        return paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.CHARGE,
+                gateway, result.getTransactionId(), amount, order.getCurrency()));
+    }
+
+    /**
+     * Takes part of an extra charge from the wallet, in the caller's transaction.
+     *
+     * @throws WalletService.InsufficientBalanceException when the wallet holds less
+     */
+    public PaymentTransaction chargeExtraFromWallet(Order order, BigDecimal amount, String note, String by) {
+        WalletService.Entry entry = wallets.debit(order.getCustomerId(), WalletService.Kind.ORDER_PAYMENT, amount,
+                order.getOrderId(), note, by);
+        order.setWalletAmount(order.getWalletAmount().add(amount));
+        log.info("[PAYMENT] {} {} more for Order {} paid from the wallet ({})", amount, order.getCurrency(),
+                order.getOrderId(), entry.reference());
+        return paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.CHARGE,
+                WALLET, entry.reference(), amount, order.getCurrency()));
+    }
+
+    private static String gatewayOf(String transactionId) {
+        return transactionId.startsWith("TXN-ADYEN") ? "ADYEN" : "STRIPE";
     }
 
     /**
@@ -219,7 +272,7 @@ public class PaymentGatewayService {
             return;
         }
         order.setPaymentTransactionId(payment.getTransactionId());
-        order.setPaymentGateway(payment.getTransactionId().startsWith("TXN-ADYEN") ? "ADYEN" : "STRIPE");
+        order.setPaymentGateway(gatewayOf(payment.getTransactionId()));
         paymentTransactionRepository.save(new PaymentTransaction(order.getOrderId(), PaymentTransaction.Kind.CHARGE,
                 order.getPaymentGateway(), payment.getTransactionId(), payment.getAmount(), order.getCurrency()));
     }
