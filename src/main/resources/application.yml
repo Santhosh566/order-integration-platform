@@ -151,6 +151,22 @@ orders:
     slot-capacity: ${ORDERS_SLOT_CAPACITY:40}
     # Delivery days a customer can choose from, starting at the standard delivery date
     slot-days: 6
+  live-tracking:
+    # Positions from a driver's phone closer together than this are answered but not kept or sent on
+    min-interval: PT10S
+    # Positions rougher than this many metres are refused (the phone's "approximate location")
+    max-accuracy-m: 2000
+    # The arrival estimate: straight-line distance × road-factor ÷ city-speed-kmh
+    city-speed-kmh: 20
+    road-factor: 1.4
+    # No position for this long: the map says when the driver was last seen
+    stale-after: PT3M
+    # Within this many metres of the centre of the delivery PIN code, the customer is told once that the driver
+    # is in their area. A PIN area spans kilometres, so this is "nearby", not "at the door".
+    nearby-m: 1000
+    # The route drivers took is deleted after this (privacy); kept only to settle delivery disputes
+    trail-kept-for: P7D
+    cleanup-poll-ms: 3600000
   cart:
     # How often the reminder job looks for carts left without an order
     reminder-poll-ms: ${ORDERS_CART_REMINDER_POLL_MS:600000}

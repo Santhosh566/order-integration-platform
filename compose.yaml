@@ -4,7 +4,9 @@ name: oip
 
 services:
   postgres:
-    image: postgres:15-alpine
+    # PostgreSQL 15 with PostGIS for driver positions and distances (V28). The same major version as before,
+    # so an existing data volume keeps working; the extension is created by the migration.
+    image: postgis/postgis:15-3.5-alpine
     container_name: oip-postgres
     environment:
       POSTGRES_DB: orders

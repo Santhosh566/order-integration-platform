@@ -19,7 +19,7 @@ class FlywayUpgradeIT {
 
     @Test
     void existingDatabase_isBaselinedAndKeepsItsData() throws Exception {
-        try (PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")) {
+        try (PostgreSQLContainer postgres = new PostgreSQLContainer(TestImages.POSTGRES)) {
             postgres.start();
             String url = postgres.getJdbcUrl();
 

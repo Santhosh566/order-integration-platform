@@ -107,6 +107,25 @@ public class OrderEventBroadcaster {
         }
     }
 
+    /**
+     * Shares an event about one order that is not the order itself (a driver's position): admins get
+     * staffData, and the order's customer gets customerData. Waits for the commit, like broadcast.
+     */
+    public void broadcastForOrder(String eventName, String orderId, String customerId, Object staffData, Object customerData) {
+        LiveEvent event = new LiveEvent(eventName, orderId, customerId, json(staffData),
+                customerData == null ? null : json(customerData), podId);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    publish(event);
+                }
+            });
+        } else {
+            publish(event);
+        }
+    }
+
     private void publish(LiveEvent event) {
         String eventName = event.name();
         try {

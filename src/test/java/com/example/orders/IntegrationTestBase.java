@@ -87,7 +87,8 @@ abstract class IntegrationTestBase {
         }
     }
 
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:15-alpine");
+    /** PostgreSQL 15 with PostGIS, as in compose.yaml */
+    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(TestImages.POSTGRES);
     static final KafkaContainer KAFKA = new KafkaContainer("apache/kafka:3.7.0");
     static final GenericContainer<?> MAILPIT =
             new GenericContainer<>("axllent/mailpit:v1.21").withExposedPorts(1025, 8025);
