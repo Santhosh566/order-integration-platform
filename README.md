@@ -1,19 +1,243 @@
 # Order Integration Platform
 
-Spring Boot and Apache Camel order processing: REST, CSV and XML intake, a Kafka pipeline with a
-saga for stock, payment and shipping, GST invoices, returns with pickups and credit notes. The web
-app (shop, admin console, delivery screens) is in `../order-platform-web` and is served from this
-backend in production.
+The backend of an Indian online shop, built with **Spring Boot 4** and **Apache Camel 4**. It takes orders from
+the web shop, REST, and partner CSV/XML files, runs them through a **Kafka** pipeline with a **saga** for stock,
+payment and shipping, ships each order from the **nearest warehouse** that has it, charges **GST** under that
+warehouse's registration, and handles delivery by its own drivers (with **live tracking**), returns, credit
+notes, coupons, wallets and gift cards, and abandoned-cart reminders.
 
-Payments, carriers and SMS are still simulated. Email is real SMTP, caught by Mailpit in
-development.
+The web app (shop, admin console, delivery screens) is in [`../order-platform-web`](../order-platform-web) and is
+served from this backend in production.
+
+Payments, carriers and SMS are simulated. Email is real SMTP, caught by **Mailpit** in development.
+
+## At a glance
+
+| | |
+|---|---|
+| Language and frameworks | Java 21 · Spring Boot 4.1.2 · Apache Camel 4.22.2 |
+| Camel routes | 63 routes in 10 `RouteBuilder` classes ([`route/`](src/main/java/com/example/orders/route)) |
+| Camel components | 11 used by routes, plus 3 data formats ([list](#camel-components-used)) |
+| Enterprise Integration Patterns | 30 ([list](#enterprise-integration-patterns-used)) |
+| Database | PostgreSQL 15 + **PostGIS** 3.5, schema by **Flyway** (29 migrations, V1–V29) |
+| Messaging | Apache Kafka 3.7 (KRaft): `order.created` (6 partitions), `order.created.DLT`, `platform.events` |
+| Sign-in | Keycloak 26 (OpenID Connect); the app checks JWTs |
+| Tests | 42 integration test classes on **Testcontainers**, 8 unit test classes |
+
+## Architecture
+
+```
+   Web shop / admin / driver app          Partner CSV & XML files        Partner REST
+   (React, ../order-platform-web)         (data/inbox)                   (/api/orders)
+            │  REST + GraphQL + SSE                 │ file component            │ platform-http
+            ▼                                       ▼                           ▼
+ ┌─────────────────────────────────────── Spring Boot + Apache Camel ──────────────────────────────────┐
+ │  Intake routes: validate, translate, normalise, price, choose warehouse, GST ─► save order + OUTBOX │
+ │                                         (one DB transaction)                                         │
+ │  Outbox poller ──────────────────────────────► Kafka order.created ─────► Order pipeline (consumers) │
+ │                                                                            saga: reserve stock       │
+ │                                                                                  ► pay ► ship        │
+ │  Fulfilment: aggregator, claim check (invoice PDF), recipient list (warehouse, head office, …)       │
+ │  Delivery, returns, wallet, carts, live tracking, warehouses (Spring services)                       │
+ │  Timers: notifications · recovery · carrier tracking · prices · cart reminders · tracking cleanup    │
+ └───────┬──────────────────┬───────────────────┬──────────────────┬──────────────────┬────────────────┘
+         ▼                  ▼                   ▼                  ▼                  ▼
+  PostgreSQL+PostGIS   Kafka (+ Kafka UI)   LRA coordinator     Mailpit (SMTP)     MinIO (photos)
+  orders, stock,        events between       keeps sagas,        catches every      product and
+  warehouses, ledger    pods, DLT            compensates         email              profile photos
+         ▲
+  Keycloak (sign-in) · Prometheus + Grafana (metrics)
+```
+
+**One rule runs through it:** nothing is sent to Kafka or by email before the database commits. New orders and
+dead-letter replays go through an **outbox** table; emails through a **notification outbox**; live events wait for
+the commit.
+
+## Technology, and why it is here
+
+| Tool | What it is | What it does here |
+|---|---|---|
+| **Spring Boot 4** | Java application framework | Web server, security, transactions, configuration, scheduling |
+| **Apache Camel 4** | Integration framework (see [below](#apache-camel-in-this-project)) | Every route an order takes: intake, pipeline, saga, fulfilment, pollers |
+| **Apache Kafka** | Distributed log / message broker | Orders flow through `order.created`; failed ones land in `order.created.DLT`; `platform.events` carries live updates between pods |
+| **PostgreSQL 15** | Relational database | All business data; row locks keep stock, coupons and slots correct under load |
+| **PostGIS** | Spatial extension for Postgres | Positions as `geography(Point, 4326)`: nearest warehouse with stock (`ST_Distance`), "driver is in your area" (`ST_DWithin`), driver and PIN positions, GiST indexes |
+| **Flyway** | Database migrations | Builds and upgrades the schema from `db/migration/V1…V29`; Hibernate only validates |
+| **Hibernate / JPA + JdbcTemplate** | Database access | Entities for orders and users; plain SQL where it is clearer |
+| **Keycloak** | Identity provider (OpenID Connect) | Sign-in, sign-up, passwords and roles; the app is a JWT resource server |
+| **Narayana LRA coordinator** | Saga coordinator | Keeps sagas outside the JVM and calls compensations if a pod stops |
+| **Mailpit** | Fake mail server with a web inbox | Catches every email in development (http://localhost:8025); tests use it too |
+| **MinIO** | S3-compatible object storage | Product, promotion and profile photos (private bucket, served through the API) |
+| **Spring for GraphQL** | GraphQL server | Shop search, filters, product pages, delivery dates (`/graphql`) |
+| **OpenPDF** | PDF library | GST tax invoices |
+| **Thumbnailator** | Image library | Resizes photos, turns them upright, strips GPS metadata |
+| **Micrometer + Prometheus + Grafana** | Metrics | Camel route metrics and app metrics; "Order Platform" dashboard |
+| **Kafka UI** | Web UI for Kafka | Browse topics, consumer groups and the dead-letter topic |
+| **Testcontainers** | Throwaway Docker containers for tests | Each test run gets its own PostGIS, Kafka, Mailpit (and MinIO, LRA where needed) |
+| **REST Assured + Awaitility** | Test libraries | Call the real API; wait for asynchronous order states |
+
+### PostGIS in short
+Positions are stored as `geography(Point, 4326)`: longitude and latitude on the WGS 84 globe phones use, so
+distances come back in **metres** on the real Earth. Used for:
+- **Choosing the warehouse:** `ORDER BY ST_Distance(warehouse.location, pin.centre)` among warehouses that hold every line.
+- **Delivery dates:** days on the road from the warehouse's distance to the PIN.
+- **Live tracking:** ETA from `ST_Distance(driver, PIN centre)`; one "in your area" email via `ST_DWithin(…, 1000)`.
+- **PIN centres:** the median position of each PIN's post offices from the India Post directory.
+
+`ST_MakePoint` takes **longitude first**. The image is `postgis/postgis:15-3.5-alpine` in `compose.yaml` and in the tests.
+
+### Mailpit in short
+A mail server that delivers nothing: it keeps every email and shows it at http://localhost:8025. The app sends
+real SMTP to it (port 1025), so order emails, delivery codes, cart reminders and back-in-stock emails can be read
+there. In production `ORDERS_MAIL_HOST` points at a real SMTP server.
+
+### Testcontainers in short
+`mvn verify` starts **real** PostGIS, Kafka and Mailpit in Docker on random ports
+([`IntegrationTestBase`](src/test/java/com/example/orders/IntegrationTestBase.java)), points Spring at them, lets
+Flyway build the schema from V1, runs the tests against the real REST API, and deletes the containers afterwards
+(the Ryuk container cleans up even after a crash). The containers are started once and shared by every test class.
+Tests never touch the containers from `compose.yaml` or your data. Integration tests end in `IT` (Failsafe);
+unit tests end in `Test` (Surefire).
+
+## Apache Camel in this project
+
+**Apache Camel** is an integration framework: it moves messages between systems along **routes**, using ready-made
+**components** to talk to those systems and **Enterprise Integration Patterns (EIPs)** to decide what happens to
+each message on the way.
+
+| Term | Meaning | Example here |
+|---|---|---|
+| **Route** | A path a message takes, written in Java DSL: `from(…)…to(…)` | `create-order`, `process-order`, `outbox-poller` |
+| **Endpoint** | An address a route reads from or writes to, as a URI | `kafka:order.created`, `timer:outboxPoller`, `direct:processOrder` |
+| **Component** | The plug-in behind an endpoint's scheme | `kafka`, `timer`, `file`, `smtp` |
+| **Exchange** | One message in flight: body, headers, properties | an order, with `currentOrderId` as a property |
+| **EIP** | A named, proven way to handle a message | Splitter, Aggregator, Saga, Dead Letter Channel |
+
+A route from [`OrderRoute`](src/main/java/com/example/orders/route/OrderRoute.java), shortened:
+
+```java
+from("direct:createOrder")                                   // Direct component: called by the REST route
+    .unmarshal().json(JsonLibrary.Jackson, OrderRequest.class) // Message Translator: JSON → request object
+    .filter(simple("${body.externalReference} startsWith 'TEST-'"))  // Message Filter: test orders stop here
+        .stop()
+    .end()
+    .to("direct:processOrder");
+
+from("direct:processOrder")
+    .transacted()                                            // Transactional Client: one DB transaction
+    .bean(CatalogService.class, "applyPrices")               // price, coupon, choose warehouse, GST
+    .choice()                                                // Content-Based Router: by order value
+        .when(simple("${body.total} > {{orders.pricing.high-value-above}}"))
+            .setHeader("orderType", constant("HIGH_VALUE"))
+        .otherwise()
+            .setHeader("orderType", constant("STANDARD"))
+    .end()
+    .idempotentConsumer(header("idempotencyKey"), orderIdRepository)  // Idempotent Consumer: no double orders
+    .bean(OrderService.class, "prepare");                    // save order + outbox row
+```
+
+### Camel components used
+
+| # | Component | Endpoints | Used for |
+|---|---|---|---|
+| 1 | **direct** | `direct:processOrder`, `direct:reserveInventory`, … (100+) | Calling one route from another in the same thread |
+| 2 | **timer** | 7 pollers: `outboxPoller`, `customerNotifications`, `stuckOrderRecovery`, `carrierTracking`, `catalogPriceScheduler`, `cartReminders`, `trackingCleanup` | Polling Consumers |
+| 3 | **kafka** | `order.created`, `order.created.DLT`, `platform.events` | The order pipeline, dead letters, live updates between pods |
+| 4 | **platform-http** | REST DSL on the Spring Boot web server | `/api/orders` and other Camel REST endpoints |
+| 5 | **rest** (REST DSL) | 8 `rest(…)` definitions | Declaring those REST endpoints |
+| 6 | **file** | `file:{{orders.inbox-dir}}/csv`, `…/xml` | Partner CSV and XML files dropped in `data/inbox` |
+| 7 | **sql** | `sql:select … from orders` | Order searches; JDBC aggregation repository and idempotent repository |
+| 8 | **smtp** (mail) | `smtp://{{orders.mail.host}}` | Customer and staff emails (Mailpit in development) |
+| 9 | **json-validator** | `json-validator:schema/order-schema.json` | Checking partner JSON against a schema |
+| 10 | **bean** | `.bean(…)` | Calling Spring services from routes |
+| 11 | **micrometer** | route policy | `camel_exchanges_*`, `camel_route_*` metrics for Prometheus |
+
+**Data formats and languages:** Jackson (JSON), JAXB (XML), Bindy (CSV), plus JsonPath and Camel's Simple language.
+**Saga service:** `camel-lra` connects `.saga()` to the Narayana LRA coordinator (or an in-memory saga service when
+`ORDERS_LRA_ENABLED=false`).
+
+`camel-jpa-starter`, `camel-resilience4j-starter` and `camel-caffeine-starter` are in `pom.xml` but no route uses
+them today; they can be removed, or used for a circuit breaker or a cache later.
+
+### Enterprise Integration Patterns used
+
+| # | EIP | Camel DSL | Where and why |
+|---|---|---|---|
+| 1 | **Message Channel / Point-to-Point** | `direct:`, Kafka topics | Routes hand messages to each other |
+| 2 | **Channel Adapter** | `file`, `platform-http`, `kafka` | Orders arrive by file, REST and Kafka |
+| 3 | **Message Translator** | `.marshal()` / `.unmarshal()` / `.convertBodyTo()` | JSON, XML and CSV to Java objects and back |
+| 4 | **Normalizer** | `OrderNormalizer` | CSV, XML and JSON partner orders become one canonical `Order` |
+| 5 | **Canonical Data Model** | `Order`, `OrderItem` | One order shape for every channel |
+| 6 | **Message Validator** | `.validate()`, `json-validator:` | Reject bad requests and schema-invalid partner JSON |
+| 7 | **Message Filter** | `.filter()` | Drop `TEST-` orders, skip orders already processed |
+| 8 | **Content-Based Router** | `.choice()` | Order type by value; staff versus customer emails |
+| 9 | **Splitter** | `.split()` | Outbox batches, CSV lines, stuck orders |
+| 10 | **Aggregator** | `.aggregate()` + JDBC repository | Wait for both `PAYMENT_CAPTURED` and `WAREHOUSE_PACKED` before release (`FulfillmentRoute`) |
+| 11 | **Recipient List** | `.recipientList()` | Pick list to the order's warehouse, head office, white-glove desk, dropship partner |
+| 12 | **Routing Slip** | `.routingSlip()` | High-value orders get the fraud evaluation step added |
+| 13 | **Scatter-Gather** | `.multicast()` + `LowestShippingQuoteAggregationStrategy` | Ask FedEx, DHL and UPS for quotes in parallel, keep the cheapest |
+| 14 | **Multicast** | `.multicast().stopOnException()` | Send a customer message on several channels |
+| 15 | **Content Enricher** | `.enrich()` + `CustomerAggregationStrategy` | Add the customer's profile to a notification |
+| 16 | **Claim Check** | `.claimCheck(Push)` | Store the heavy invoice PDF, pass a ticket instead |
+| 17 | **Wire Tap** | `.wireTap("direct:auditOrder")` | Audit trail without slowing the order down |
+| 18 | **Idempotent Consumer** | `.idempotentConsumer()` | A reused order reference or a Kafka redelivery is processed once |
+| 19 | **Transactional Client** | `.transacted()` | Order, outbox row and stock in one DB transaction |
+| 20 | **Transactional Outbox** (Guaranteed Delivery) | `OutboxRoute` | Nothing reaches Kafka unless the order was committed |
+| 21 | **Saga** (Compensating Transaction) | `.saga()` + `.compensation()` | Stock, payment, shipping; undone in reverse when a step fails |
+| 22 | **Load Balancer (failover)** | `.loadBalance().failover()` | Second payment gateway when the first is down |
+| 23 | **Throttler** | `.throttle()` | At most 20 payment calls and 10 SMS a second |
+| 24 | **Dead Letter Channel** | `errorHandler(deadLetterChannel(…))` | Failed orders go to `order.created.DLT` and a table, to replay later |
+| 25 | **Polling Consumer** | `timer:` routes | Outbox, notifications, recovery, tracking, prices, cart reminders |
+| 26 | **Competing Consumers** | Kafka consumer group, 3 consumers per pod | Orders processed side by side; one partition keeps one order in order |
+| 27 | **Publish-Subscribe Channel** | `platform.events`, one consumer group per pod | Every pod hears every live update for its browsers |
+| 28 | **Correlation Identifier** | `X-Correlation-ID` header + MDC | Follow one order through every log line |
+| 29 | **Event Message** | `LiveEvent`, `OrderStatusChanged` | "Order changed", "driver moved" |
+| 30 | **Control Bus** | Camel route controller (`RouteManagementService`) | Admins pause, resume, stop and start consumer routes from Operations |
+
+## Placing an order, end to end
+
+```
+POST /api/orders ─► create-order: validate, translate, filter
+                 ─► process-order (one transaction):
+                      price + coupon ─► choose the nearest warehouse with every line (PostGIS)
+                      ─► GST from that warehouse's state and GSTIN ─► wallet / COD / slot
+                      ─► save order (PENDING) + outbox row ─► 202 Accepted
+Outbox poller ─► Kafka order.created (key = order id)
+Consumer ─► saga: reserve stock in that warehouse (re-routes to the next nearest if it ran out)
+          ─► payment (wallet, card, COD) ─► CONFIRMED ─► carrier quotes ─► recipient list
+Fulfilment ─► packed (READY_FOR_DISPATCH) ─► invoice from the warehouse's own series (e.g. GGI/26-27/000001)
+Delivery ─► a driver of that warehouse takes it ─► picked up (stock leaves the warehouse)
+          ─► out for delivery (code emailed, live tracking) ─► DELIVERED
+```
+
+## Project layout
+
+| Package (`src/main/java/com/example/orders/`) | What is in it |
+|---|---|
+| `route/` | Camel routes and aggregation strategies |
+| `controller/` | Spring REST controllers (`/api/...`) |
+| `service/` | Business logic: orders, stock ledger, checkout, GST, invoices, returns, wallet, carts, … |
+| `warehouse/` | Warehouses, the allocator (nearest warehouse with stock), transfers |
+| `delivery/` | Drivers, delivery dates, PIN directory, live tracking |
+| `graphql/` | Shop catalogue and search (GraphQL) |
+| `model/`, `repository/` | JPA entities and repositories |
+| `security/` | JWT users, roles, inactive accounts |
+| `money/` | Rupee amounts, GST rules, Indian states |
+| `config/` | Camel, security, Kafka topics, time zone, web app |
+
+| Resources | What is in it |
+|---|---|
+| `db/migration/V1…V29` | The schema (Flyway) |
+| `db/demo/R__*.sql` | Demo customers and coupons (development only) |
+| `graphql/catalogue.graphqls` | GraphQL schema |
+| `demo/catalogue.json` | 160 demo products in 50 categories |
 
 ## Run it
 
 Requires Java 21+, Maven and Docker.
 
 ```bash
-docker compose up -d      # Postgres, Kafka, Mailpit, Kafka UI, Prometheus, Grafana, LRA coordinator
+docker compose up -d      # PostGIS, Kafka, Mailpit, Kafka UI, Prometheus, Grafana, LRA coordinator
 mvn spring-boot:run       # API on http://localhost:9091
 ```
 
@@ -38,20 +262,95 @@ database connections and wakes up with old code if resumed (`jobs` lists paused 
 |---|---|---|
 | Application | http://localhost:9091 | Web app (after `npm run build`) and the API |
 | Web app (dev) | http://localhost:5173 | `npm run dev` in ../order-platform-web |
+| PostgreSQL + PostGIS | localhost:5434 | Database `orders`, user `orders` |
 | Mailpit | http://localhost:8025 | Inbox for every email the app sends |
 | Kafka UI | http://localhost:8085 | Topics, consumers and `order.created.DLT` |
 | Prometheus | http://localhost:9090 | Metrics, under Status > Targets |
 | Grafana | http://localhost:3000 | "Order Platform" dashboard (admin / admin) |
 | LRA coordinator | http://localhost:8087/lra-coordinator | Open sagas, as JSON |
+| Keycloak | http://localhost:8084 | Sign-in (`docker compose --profile keycloak up -d` if you have none) |
 
 ## Test it
 
 ```bash
-mvn verify
+mvn test       # unit tests only, no Docker (seconds)
+mvn verify     # unit + integration tests, needs Docker (about 15–20 minutes)
+mvn verify -Dit.test=WarehouseAllocationIT -Dtest=None -Dsurefire.failIfNoSpecifiedTests=false   # one class
 ```
 
-Needs Docker running. Tests start their own throwaway Postgres, Kafka and Mailpit, so they never
-touch the containers above or your data. A full run takes about 3 minutes.
+Integration tests run against Testcontainers (see above), so they never touch your data. The photo tests need
+MinIO's free-disk threshold (a few GB free); with less, uploads answer 503.
+
+## Database changes
+
+Flyway owns the schema. To change it, add `src/main/resources/db/migration/V<next>__<what>.sql`.
+**Never edit a migration that has already run** (Flyway checks each file's checksum and refuses to start).
+Hibernate only validates that the entities match.
+
+`src/main/resources/db/demo` holds the development customers and coupons. Production must set
+`ORDERS_FLYWAY_LOCATIONS=classpath:db/migration` to leave them out.
+
+---
+
+# Feature reference
+
+## Warehouses
+
+Stock is kept per warehouse (V29). Each warehouse has its own **GSTIN**, **position** (PostGIS), same-day **cut-off
+time**, and **invoice and credit-note prefixes** (CGST Rule 46: each GSTIN numbers its own documents, at most
+16 characters).
+
+- **Tables:** `warehouses`, `warehouse_stock (warehouse_id, sku)`, `stock_movements.warehouse_id`,
+  `orders.warehouse_id`, `app_users.home_warehouse_id`. `inventory.available_quantity` and `reserved_quantity` are
+  the **totals** over all warehouses, which the shop reads; `StockLedger` changes a warehouse and the totals in one
+  transaction, so they always agree.
+- **The first warehouse, BLR** (default), holds all stock from before V29 and keeps the `INV` and `CN` series.
+- **Choosing a warehouse** (`WarehouseAllocator`): when an order is priced, the nearest **open** warehouse that
+  holds **every line** (PostGIS distance to the delivery PIN's centre). GST is then worked out from that
+  warehouse's state (CGST + SGST inside it, IGST across states) and its GSTIN goes on the order.
+- **Never split:** when the shop has everything but not in one warehouse, the quote says so (`shippingProblem`)
+  and placing the order is refused (400, "order them separately").
+- **At reservation**, under the products' row locks, the chosen warehouse is checked again; if it ran out, the order
+  moves to the next nearest and its GST split is redone (no invoice exists yet).
+- **Invoices** use the warehouse's series (`GGI/26-27/000001`) and show its address; credit notes, partial
+  cancels, returns and failed deliveries go back to the warehouse that shipped.
+- **Drivers** work from one warehouse (`PUT /api/admin/users/{id}/warehouse`) and see, take and are assigned only
+  its deliveries and return pickups (`GET /api/delivery/warehouse` tells them which).
+- **Delivery dates** (product page) start from the nearest warehouse with the product: its cut-off and its distance.
+- **Admin API:** `GET/POST /api/admin/warehouses`, `PATCH /api/admin/warehouses/{id}` (name, address, cut-off,
+  position, open/closed; code, PIN, GSTIN and prefixes never change; the default cannot close),
+  `POST /api/admin/warehouses/transfers` (`TRANSFER_OUT` + `TRANSFER_IN` in one transaction),
+  `GET /api/admin/catalog/{sku}/warehouses`, and stock changes with an optional `warehouseId`.
+  `GET /api/public/warehouses` gives the shop the names for "Ships from".
+- The Camel **Recipient List** sends the pick list to the order's warehouse (`direct:warehouseHub`).
+
+## Live tracking
+
+Our own drivers' phones share their position while a parcel is **out for delivery** (V28, PostGIS).
+
+- `POST /api/delivery/location` (drivers) is accepted only while the driver has an order `OUT_FOR_DELIVERY`;
+  positions outside India or rougher than 2 km are refused; one is kept every 10 s at most.
+- `GET /api/orders/{id}/tracking` (the order's customer or an admin): the driver's last position, the
+  destination (the centre of the delivery PIN, marked approximate), distance by road and ETA
+  (straight line × 1.4 ÷ 20 km/h), and `inYourArea`. It ends when the order is delivered.
+- Each new position reaches the customer at once through `platform.events` (`DRIVER_LOCATION`).
+- Within 1 km of the PIN centre the customer is emailed **once** per attempt that the driver is in their area.
+- `GET /api/admin/delivery/locations`: every driver out for delivery, for the admin's map.
+- **Privacy:** positions only while out for delivery, only to that order's customer; the trail
+  (`driver_location_trail`) is deleted after 7 days by `TrackingCleanupRoute`.
+
+## Cart and abandoned-cart reminders
+
+The cart is kept on the server (`/api/cart`, V27), so it follows the customer between devices.
+
+- `GET`, `PUT` (replace), `POST /merge` (a cart a browser kept on its own; the larger quantity wins), `DELETE`.
+- Placing an order removes its products from the cart, in the order's transaction.
+- `CartReminderRoute` emails a customer who left a cart: after **1 hour**, and after **24 hours** with a personal
+  **5% coupon** (up to ₹500, single use, 48 hours, at most one such coupon a month). No emails between 9 PM and
+  9 AM, to customers who turned reminders off in their profile, or when nothing in the cart can be bought.
+  Each cart is handled under a row lock other pods skip, so a reminder goes out once.
+- A cart ordered after a reminder counts as **recovered**: `GET /api/admin/carts/stats` and `/api/admin/carts`.
+- Personal coupons (`coupons.customer_id`) work only for their customer and stay out of offers and banners.
 
 ## Order life cycle
 
@@ -86,7 +385,8 @@ PENDING -> INVENTORY_RESERVED -> CONFIRMED -> SHIPPED -> READY_FOR_DISPATCH
   always reads an order under its row lock before saving it, so the check never fails there.
 - Failures end in `OUT_OF_STOCK`, `FRAUD_REJECTED`, `PAYMENT_FAILED` or `FULFILLMENT_FAILED`.
 - `SHIPPED` means a carrier is booked. Stock leaves the reservation at `IN_TRANSIT`.
-- Every order is screened against the blacklist. Orders over $1,000 also get the full fraud evaluation.
+- Every order is screened against the blacklist. Orders above `orders.pricing.high-value-above` (₹1,00,000) also get
+  the full fraud evaluation (a Routing Slip adds the step).
 
 ## User profiles
 
@@ -288,8 +588,11 @@ nothing a seller types can turn into markup on the page.
 - **Clothing and footwear GST** follows the price (categories with the `APPAREL_2500` rule): 5% up to
   Rs 2,500 a piece before GST, 18% above. Rates in the demo data are for demonstration; confirm real
   rates with an accountant.
-- **Delivery dates by PIN** (`deliveryEstimate` in GraphQL): ordered by 2 PM on a dispatch day it
-  leaves that day; 2–3 delivery days, 3 more for hill states, the North East and the islands. Sundays
+- **Delivery dates by PIN** (`deliveryEstimate` in GraphQL): counted from the nearest warehouse that has the
+  product (`shipsFrom`): ordered before that warehouse's cut-off on a dispatch day it leaves that day; then
+  1 day within 50 km, 2 within 400 km, 3 within 1,200 km, 4 beyond (PostGIS distance to the PIN's centre),
+  and 3 more for hill states, the North East and the islands. Checkout slots use the general estimate
+  (2–3 days from a 2 PM cut-off), which no warehouse is slower than. Sundays
   and **holidays** are skipped (`DeliveryEstimator`, `HolidayCalendar`): a national holiday stops
   dispatch and delivery everywhere, a state's holiday only deliveries in that state, and the estimate
   lists the holidays it skipped. Admins keep the list (`/api/admin/holidays`, table `public_holidays`);
@@ -459,14 +762,7 @@ file is ignored, and an unknown product is refused with a 400.
 - An order needs an active customer, on every channel. Unknown or disabled customers get a 400.
 - An order uses the `shippingAddress` in its request, or the customer's default address. With
   neither it is refused. The address is copied onto the order, so old orders never change.
-- `shippingAddress.state` takes a state code such as `NY`, which picks the regional hub.
+- `shippingAddress.state` takes an Indian state's name, abbreviation or GST code (`Karnataka`, `KA`, `29`). It decides the
+  place of supply for GST; the warehouse an order ships from is chosen separately (see *Warehouses*).
 - Customers imported from old orders have no email, phone or address until they are added.
 - A customer sets their default address with `PUT /api/me/address`; `GET /api/me` shows it.
-
-## Database changes
-
-Flyway owns the schema. To change it, add `src/main/resources/db/migration/V<next>__<what>.sql`.
-Never edit a migration that has already run. Hibernate only validates that the entities match.
-
-`src/main/resources/db/demo` holds the development customers and coupons. Production must set
-`ORDERS_FLYWAY_LOCATIONS=classpath:db/migration` to leave them out.
