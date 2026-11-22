@@ -22,12 +22,14 @@ public class CatalogService {
     private final InventoryRepository inventoryRepository;
     private final CustomerService customerService;
     private final GstService gstService;
+    private final com.example.orders.warehouse.WarehouseAllocator allocator;
 
     private final com.example.orders.security.CurrentUser currentUser;
     private final CheckoutService checkout;
     private final com.example.orders.repository.CategoryRepository categories;
 
     public CatalogService(InventoryRepository inventoryRepository, CustomerService customerService, GstService gstService,
+                          com.example.orders.warehouse.WarehouseAllocator allocator,
                           com.example.orders.security.CurrentUser currentUser, CheckoutService checkout,
                           com.example.orders.repository.CategoryRepository categories) {
         this.currentUser = currentUser;
@@ -36,6 +38,7 @@ public class CatalogService {
         this.inventoryRepository = inventoryRepository;
         this.customerService = customerService;
         this.gstService = gstService;
+        this.allocator = allocator;
     }
 
     @Transactional(readOnly = true)
@@ -92,7 +95,17 @@ public class CatalogService {
                 }
             }
         }
-        gstService.apply(order);
+        // The warehouse decides CGST + SGST or IGST, and whose GSTIN goes on the invoice. A new order ships from the
+        // nearest one with everything; one that already has a warehouse (items added to it) keeps it.
+        Long from = order.getWarehouseId();
+        if (from == null) {
+            com.example.orders.warehouse.WarehouseAllocator.Choice choice = allocator.choose(order);
+            if (lock && choice.problem() != null) {
+                throw new InvalidOrderException(choice.problem());
+            }
+            from = choice.warehouse() == null ? null : choice.warehouse().id();
+        }
+        allocator.shipFrom(order, from);
     }
 
     /** The GST rule of a category, or of its main category; null when neither has one. */

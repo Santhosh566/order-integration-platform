@@ -34,16 +34,32 @@ public class InvoiceNumberService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /** The series of the default warehouse (INV, CN). */
     @Transactional(propagation = Propagation.MANDATORY)
     public String next(Series series, LocalDate date) {
+        return next(series.prefix, date);
+    }
+
+    /**
+     * The next number in a warehouse's own series: each GSTIN numbers its documents separately (CGST Rule 46).
+     * The default warehouse keeps INV and CN; others have their own prefixes (warehouses.invoice_prefix).
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public String next(Series series, long warehouseId, LocalDate date) {
+        String prefix = jdbcTemplate.queryForObject("select " + (series == Series.INVOICE ? "invoice_prefix" : "credit_note_prefix")
+                + " from warehouses where warehouse_id = ?", String.class, warehouseId);
+        return next(prefix, date);
+    }
+
+    private String next(String prefix, LocalDate date) {
         String year = financialYear(date);
         Long number = jdbcTemplate.queryForObject(
                 "INSERT INTO document_sequences (series, financial_year, last_number) VALUES (?, ?, 1) "
                         + "ON CONFLICT (series, financial_year) "
                         + "DO UPDATE SET last_number = document_sequences.last_number + 1 "
                         + "RETURNING last_number",
-                Long.class, series.prefix, year);
-        return String.format("%s/%s/%06d", series.prefix, year, number);
+                Long.class, prefix, year);
+        return String.format("%s/%s/%06d", prefix, year, number);
     }
 
     /** "26-27" for any date from 1 April 2026 to 31 March 2027. */

@@ -55,6 +55,11 @@ public class Order {
     @Column(name = "customer_id", nullable = false)
     private String customerId;
 
+    /** The warehouse it is packed and shipped from; chosen when its stock is reserved, never by the caller */
+    @Column(name = "warehouse_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long warehouseId;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -235,6 +240,9 @@ public class Order {
     }
 
     public Long getVersion() { return version; }
+
+    public Long getWarehouseId() { return warehouseId; }
+    public void setWarehouseId(Long warehouseId) { this.warehouseId = warehouseId; }
 
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }

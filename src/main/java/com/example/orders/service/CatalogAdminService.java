@@ -63,7 +63,8 @@ public class CatalogAdminService {
     public record PriceChange(Integer expectedVersion, BigDecimal unitPrice, BigDecimal gstRate,
                               LocalDateTime effectiveFrom, String reason) {}
 
-    public record StockChange(StockMovement.Type type, Integer quantity, String reason) {}
+    /** @param warehouseId the warehouse whose stock changes; the default warehouse when left out */
+    public record StockChange(StockMovement.Type type, Integer quantity, String reason, Long warehouseId) {}
 
     public record ProductView(String sku, String name, String hsnCode, BigDecimal unitPrice, BigDecimal gstRate,
                               String currency, int available, int reserved, int reorderLevel, boolean lowStock,
@@ -94,13 +95,15 @@ public class CatalogAdminService {
     private final ProductImageRepository images;
     private final ProductSpecService specService;
     private final WishlistService wishlist;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
 
     public CatalogAdminService(InventoryRepository inventory, ProductPriceRepository prices,
                                StockMovementRepository movements, StockLedger stockLedger,
                                @Value("${orders.currency:INR}") String currency,
                                CategoryService categoryService, CategoryRepository categories,
                                ProductImageRepository images, ProductSpecService specService,
-                               WishlistService wishlist) {
+                               WishlistService wishlist, com.example.orders.warehouse.WarehouseService warehouses) {
+        this.warehouses = warehouses;
         this.specService = specService;
         this.wishlist = wishlist;
         this.categoryService = categoryService;
@@ -230,7 +233,7 @@ public class CatalogAdminService {
         // The SKU is the id, so save() merges: keep working on the managed copy it returns
         item = inventory.saveAndFlush(item);
         prices.save(appliedPrice(sku, price, rate, "New product", actor));
-        stockLedger.record(item, StockMovement.Type.OPENING, opening, 0, null, "Opening stock");
+        stockLedger.record(item, warehouses.defaultId(), StockMovement.Type.OPENING, opening, 0, null, "Opening stock");
         log.info("[CATALOG] {} created {} '{}' at {} {} with {} in stock", actor, sku, name, currency, price, opening);
         return view(item);
     }
@@ -384,7 +387,8 @@ public class CatalogAdminService {
             throw new InvalidOrderException("reason must be at most 500 characters");
         }
         InventoryItem item = inventory.findForUpdate(sku).orElseThrow(() -> new ProductNotFoundException(sku));
-        return stockLedger.record(item, request.type(), change, 0, null, reason);
+        long warehouse = request.warehouseId() != null ? warehouses.get(request.warehouseId()).id() : warehouses.defaultId();
+        return stockLedger.record(item, warehouse, request.type(), change, 0, null, reason);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

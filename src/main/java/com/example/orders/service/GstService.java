@@ -53,14 +53,22 @@ public class GstService {
      * their catalogue price and GST rate.
      */
     public void apply(Order order) {
+        apply(order, sellerState, sellerGstin);
+    }
+
+    /**
+     * As apply, for goods shipped from a registration of our own in another state (a warehouse): CGST + SGST when
+     * delivered in the warehouse's state, IGST otherwise, and the warehouse's GSTIN on the order.
+     */
+    public void apply(Order order, IndianState shipFromState, String gstin) {
         IndianState placeOfSupply = placeOfSupply(order.getShippingAddress());
-        boolean intraState = placeOfSupply == sellerState;
+        boolean intraState = placeOfSupply == shipFromState;
         for (OrderItem item : order.getItems()) {
             taxLine(item, intraState);
         }
         order.setCurrency(currency);
         order.setPlaceOfSupply(placeOfSupply.gstCode());
-        order.setSellerGstin(sellerGstin);
+        order.setSellerGstin(gstin);
         order.recalculateTotals();
     }
 

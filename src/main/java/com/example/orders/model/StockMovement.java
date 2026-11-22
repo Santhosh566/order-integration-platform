@@ -35,7 +35,11 @@ public class StockMovement {
         /** Reserved units left the warehouse with the courier */
         SHIP,
         /** Goods came back from a failed delivery or a customer return */
-        RETURN
+        RETURN,
+        /** Sent to another warehouse */
+        TRANSFER_OUT,
+        /** Arrived from another warehouse */
+        TRANSFER_IN
     }
 
     @Id
@@ -44,6 +48,10 @@ public class StockMovement {
 
     @Column(nullable = false)
     private String sku;
+
+    /** The warehouse whose stock changed; availableAfter and reservedAfter are its balances */
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "movement_type", nullable = false)
@@ -74,14 +82,16 @@ public class StockMovement {
 
     protected StockMovement() {}
 
-    public StockMovement(InventoryItem after, Type type, int availableChange, int reservedChange,
-                         String orderId, String reason, String createdBy) {
-        this.sku = after.getSku();
+    /** @param availableAfter, reservedAfter the warehouse's balances after the change */
+    public StockMovement(String sku, long warehouseId, Type type, int availableChange, int reservedChange,
+                         int availableAfter, int reservedAfter, String orderId, String reason, String createdBy) {
+        this.sku = sku;
+        this.warehouseId = warehouseId;
         this.type = type;
         this.availableChange = availableChange;
         this.reservedChange = reservedChange;
-        this.availableAfter = after.getAvailableQuantity();
-        this.reservedAfter = after.getReservedQuantity();
+        this.availableAfter = availableAfter;
+        this.reservedAfter = reservedAfter;
         this.orderId = orderId;
         this.reason = reason;
         this.createdBy = createdBy;
@@ -90,6 +100,7 @@ public class StockMovement {
 
     public Long getId() { return id; }
     public String getSku() { return sku; }
+    public Long getWarehouseId() { return warehouseId; }
     public Type getType() { return type; }
     public int getAvailableChange() { return availableChange; }
     public int getReservedChange() { return reservedChange; }

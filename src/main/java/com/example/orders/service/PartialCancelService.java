@@ -169,13 +169,15 @@ public class PartialCancelService {
             release.merge(line.getSku(), units, Integer::sum);
         });
 
-        // Sorted by SKU, the same lock order as every other stock change
+        // Sorted by SKU, the same lock order as every other stock change; back to the warehouse it was reserved in
+        long warehouse = stockLedger.warehouseOf(order);
         release.forEach((sku, units) -> inventory.findForUpdate(sku).ifPresent(stock ->
-                stockLedger.record(stock, StockMovement.Type.RELEASE, units,
-                        -Math.min(units, stock.getReservedQuantity()), orderId, "Cancelled before dispatch")));
+                stockLedger.record(stock, warehouse, StockMovement.Type.RELEASE, units,
+                        -Math.min(units, stockLedger.balance(warehouse, sku).reserved()), orderId, "Cancelled before dispatch")));
 
         String actor = stockLedger.actor();
-        CreditNote note = new CreditNote(documentNumbers.next(InvoiceNumberService.Series.CREDIT_NOTE, LocalDate.now()),
+        CreditNote note = new CreditNote(documentNumbers.next(InvoiceNumberService.Series.CREDIT_NOTE,
+                stockLedger.warehouseOf(order), LocalDate.now()),
                 order, null, CreditNote.Kind.CANCELLATION, lines, reason, actor);
         if (!Money.isPositive(note.getTotal())) {
             throw new InvalidOrderStateException("Nothing is left to credit on these items of order " + orderId);

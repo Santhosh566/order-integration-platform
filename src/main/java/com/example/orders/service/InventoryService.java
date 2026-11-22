@@ -40,14 +40,20 @@ public class InventoryService {
     private final PaymentGatewayService paymentGatewayService;
     private final DeliveryAssignmentRepository deliveryAssignments;
     private final StockLedger stockLedger;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
+    private final com.example.orders.warehouse.WarehouseAllocator allocator;
 
     public InventoryService(InventoryRepository inventoryRepository,
                             OrderRepository orderRepository,
                             OrderStateService orderStateService,
                             PaymentGatewayService paymentGatewayService,
                             DeliveryAssignmentRepository deliveryAssignments,
-                            StockLedger stockLedger) {
+                            StockLedger stockLedger,
+                            com.example.orders.warehouse.WarehouseService warehouses,
+                            com.example.orders.warehouse.WarehouseAllocator allocator) {
         this.stockLedger = stockLedger;
+        this.warehouses = warehouses;
+        this.allocator = allocator;
         this.inventoryRepository = inventoryRepository;
         this.orderRepository = orderRepository;
         this.orderStateService = orderStateService;
@@ -113,16 +119,35 @@ public class InventoryService {
             return false;
         }
 
-        List<String> missingSkus = new ArrayList<>();
+        // Every product row first (sorted, as everywhere): no other order can change these products' stock in any
+        // warehouse until this commits, so the warehouse balances read below hold
+        Map<String, Integer> quantities = quantitiesBySku(order);
         Map<InventoryItem, Integer> reservations = new LinkedHashMap<>();
-        quantitiesBySku(order).forEach((sku, quantity) -> {
-            InventoryItem inv = inventoryRepository.findForUpdate(sku).orElse(null);
-            if (inv == null || inv.getAvailableQuantity() < quantity) {
-                missingSkus.add(sku);
+        List<String> missingSkus = new ArrayList<>();
+        quantities.forEach((sku, quantity) -> inventoryRepository.findForUpdate(sku)
+                .ifPresentOrElse(inv -> reservations.put(inv, quantity), () -> missingSkus.add(sku)));
+
+        // The warehouse chosen when it was placed, if it still has everything; else the nearest that has now
+        long warehouse = warehouses.of(order);
+        if (missingSkus.isEmpty() && !hasAll(warehouse, quantities)) {
+            java.util.Optional<Long> other = allocator.nearestWithAll(order);
+            if (other.isPresent()) {
+                log.info("[INVENTORY] Order {} moves from warehouse {} to {}: the first no longer has everything",
+                        orderId, warehouse, other.get());
+                warehouse = other.get();
+                // Not invoiced yet: its GST is split again from the new warehouse's registration
+                allocator.shipFrom(order, warehouse);
             } else {
-                reservations.put(inv, quantity);
+                quantities.forEach((sku, quantity) -> {
+                    if (stockLedger.balance(warehouses.of(order), sku).available() < quantity) {
+                        missingSkus.add(sku);
+                    }
+                });
+                if (missingSkus.isEmpty()) {
+                    missingSkus.addAll(quantities.keySet());
+                }
             }
-        });
+        }
 
         if (!missingSkus.isEmpty()) {
             log.warn("[INVENTORY] Rejecting order {} due to insufficient stock for SKUs: {}", orderId, missingSkus);
@@ -130,8 +155,10 @@ public class InventoryService {
             return false;
         }
 
+        long from = warehouse;
         reservations.forEach((inv, quantity) ->
-                stockLedger.record(inv, StockMovement.Type.RESERVE, -quantity, quantity, orderId, null));
+                stockLedger.record(inv, from, StockMovement.Type.RESERVE, -quantity, quantity, orderId, null));
+        order.setWarehouseId(from);
         order.setSagaId(sagaId);
         orderStateService.moveTo(order, OrderStatus.INVENTORY_RESERVED);
         return true;
@@ -282,9 +309,10 @@ public class InventoryService {
      */
     @Transactional
     public void restockReturned(Order order) {
+        long warehouse = warehouses.of(order);
         quantitiesBySku(order).forEach((sku, quantity) ->
                 inventoryRepository.findForUpdate(sku).ifPresent(inv ->
-                        stockLedger.record(inv, StockMovement.Type.RETURN, quantity, 0, order.getOrderId(),
+                        stockLedger.record(inv, warehouse, StockMovement.Type.RETURN, quantity, 0, order.getOrderId(),
                                 "Back from failed delivery")));
     }
 
@@ -294,10 +322,11 @@ public class InventoryService {
      */
     @Transactional
     public void commitShipped(Order order) {
+        long warehouse = warehouses.of(order);
         quantitiesBySku(order).forEach((sku, quantity) ->
                 inventoryRepository.findForUpdate(sku).ifPresent(inv ->
-                        stockLedger.record(inv, StockMovement.Type.SHIP, 0,
-                                -Math.min(quantity, inv.getReservedQuantity()), order.getOrderId(), null)));
+                        stockLedger.record(inv, warehouse, StockMovement.Type.SHIP, 0,
+                                -Math.min(quantity, stockLedger.balance(warehouse, sku).reserved()), order.getOrderId(), null)));
     }
 
     /**
@@ -321,10 +350,17 @@ public class InventoryService {
     }
 
     private void returnToAvailable(Order order) {
+        long warehouse = warehouses.of(order);
         quantitiesBySku(order).forEach((sku, quantity) ->
                 inventoryRepository.findForUpdate(sku).ifPresent(inv ->
-                        stockLedger.record(inv, StockMovement.Type.RELEASE, quantity,
-                                -Math.min(quantity, inv.getReservedQuantity()), order.getOrderId(), null)));
+                        stockLedger.record(inv, warehouse, StockMovement.Type.RELEASE, quantity,
+                                -Math.min(quantity, stockLedger.balance(warehouse, sku).reserved()), order.getOrderId(), null)));
+    }
+
+    /** The warehouse is open and holds every line. */
+    private boolean hasAll(long warehouse, Map<String, Integer> quantities) {
+        return warehouses.get(warehouse).active() && quantities.entrySet().stream()
+                .allMatch(e -> stockLedger.balance(warehouse, e.getKey()).available() >= e.getValue());
     }
 
     /**

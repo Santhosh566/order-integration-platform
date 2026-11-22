@@ -103,7 +103,7 @@ public class OrderChangeService {
     private final OrderAccessService orderAccess;
     private final CheckoutService checkout;
     private final CatalogService catalog;
-    private final GstService gst;
+    private final com.example.orders.warehouse.WarehouseAllocator allocator;
     private final DeliveryEstimator estimator;
     private final InventoryRepository inventory;
     private final StockLedger stockLedger;
@@ -117,7 +117,8 @@ public class OrderChangeService {
     private final BigDecimal maxOrderValue;
 
     public OrderChangeService(OrderStateService orderStateService, OrderAccessService orderAccess,
-                              CheckoutService checkout, CatalogService catalog, GstService gst,
+                              CheckoutService checkout, CatalogService catalog,
+                              com.example.orders.warehouse.WarehouseAllocator allocator,
                               DeliveryEstimator estimator, InventoryRepository inventory, StockLedger stockLedger,
                               PaymentGatewayService payments, WalletService wallets,
                               DeliveryAssignmentRepository deliveryAssignments,
@@ -128,7 +129,7 @@ public class OrderChangeService {
         this.orderAccess = orderAccess;
         this.checkout = checkout;
         this.catalog = catalog;
-        this.gst = gst;
+        this.allocator = allocator;
         this.estimator = estimator;
         this.inventory = inventory;
         this.stockLedger = stockLedger;
@@ -215,8 +216,9 @@ public class OrderChangeService {
         order.setShippingAddress(next);
         String taxNote = null;
         if (stateChanges) {
-            // Place of supply moves: each line's GST is split again; with prices that include GST the total stays
-            gst.apply(order);
+            // Place of supply moves: each line's GST is split again against the warehouse it ships from; with prices
+            // that include GST the total stays
+            allocator.shipFrom(order, stockLedger.warehouseOf(order));
             if (order.getTotal().compareTo(totalBefore) != 0) {
                 throw new InvalidOrderStateException("Delivering order " + orderId + " to " + nextState.displayName()
                         + " would change its total. Cancel it and place a new order instead.");
@@ -315,7 +317,9 @@ public class OrderChangeService {
             throw new InvalidOrderException("Wallet balance can be used with online payment only, not with cash on delivery");
         }
 
-        // Stock rows locked first, so the prices and quantities read below are current
+        // Stock rows locked first, so the prices and quantities read below are current. Added items come in the same
+        // parcel, so they must be in the warehouse the order ships from.
+        long warehouse = stockLedger.warehouseOf(order);
         Map<String, InventoryItem> stock = new TreeMap<>();
         wanted.forEach((sku, units) -> {
             InventoryItem item = inventory.findForUpdate(sku)
@@ -323,10 +327,11 @@ public class OrderChangeService {
             if (!item.isActive() || item.getUnitPrice() == null) {
                 throw new InvalidOrderException(item.getProductName() + " is no longer sold");
             }
-            if (item.getAvailableQuantity() < units) {
-                throw new InvalidOrderException(item.getAvailableQuantity() <= 0
-                        ? item.getProductName() + " is out of stock"
-                        : "Only " + item.getAvailableQuantity() + " of " + item.getProductName() + " left");
+            int there = stockLedger.balance(warehouse, sku).available();
+            if (there < units) {
+                throw new InvalidOrderException(there <= 0
+                        ? item.getProductName() + " is out of stock in the warehouse your order ships from"
+                        : "Only " + there + " of " + item.getProductName() + " left in the warehouse your order ships from");
             }
             Integer max = item.getMaxPerOrder();
             if (!staff && max != null) {
@@ -348,6 +353,8 @@ public class OrderChangeService {
         List<OrderItem> added = new ArrayList<>();
         wanted.forEach((sku, units) -> added.add(new OrderItem(sku, units, Money.ZERO)));
         quote.setItems(added);
+        // Same parcel, same warehouse: taxed from its registration
+        quote.setWarehouseId(warehouse);
         catalog.price(quote, false);
         BigDecimal extra = added.stream().map(OrderItem::getLineTotal).reduce(Money.ZERO, BigDecimal::add);
         if (!Money.isPositive(extra)) {
@@ -381,7 +388,7 @@ public class OrderChangeService {
 
         LocalDateTime now = LocalDateTime.now();
         String actor = actor();
-        wanted.forEach((sku, units) -> stockLedger.record(stock.get(sku), StockMovement.Type.RESERVE, -units, units,
+        wanted.forEach((sku, units) -> stockLedger.record(stock.get(sku), warehouse, StockMovement.Type.RESERVE, -units, units,
                 orderId, "Added to the order"));
         for (OrderItem line : added) {
             line.setAddedAt(now);

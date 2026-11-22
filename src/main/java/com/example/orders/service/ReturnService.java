@@ -244,7 +244,8 @@ public class ReturnService {
             ReturnItem.Condition condition = conditions.getOrDefault(item.getSku(), ReturnItem.Condition.SELLABLE);
             item.inspected(condition);
             if (condition == ReturnItem.Condition.SELLABLE) {
-                inventory.findForUpdate(item.getSku()).ifPresent(stock -> stockLedger.record(stock,
+                // Back on the shelf of the warehouse that shipped it
+                inventory.findForUpdate(item.getSku()).ifPresent(stock -> stockLedger.record(stock, stockLedger.warehouseOf(order),
                         StockMovement.Type.RETURN, item.getQuantity(), 0, order.getOrderId(), "Customer return " + returnId));
             }
             OrderItem line = line(order, item.getOrderItemId());
@@ -406,7 +407,8 @@ public class ReturnService {
 
     private CreditNote issue(Order order, String returnId, CreditNote.Kind kind, List<CreditNoteLine> lines,
                              String reason, String actor) {
-        CreditNote note = new CreditNote(documentNumbers.next(InvoiceNumberService.Series.CREDIT_NOTE, LocalDate.now()),
+        CreditNote note = new CreditNote(documentNumbers.next(InvoiceNumberService.Series.CREDIT_NOTE,
+                stockLedger.warehouseOf(order), LocalDate.now()),
                 order, returnId, kind, lines, reason, actor);
         if (!Money.isPositive(note.getTotal())) {
             throw new InvalidOrderStateException("Nothing is left to refund on order " + order.getOrderId());

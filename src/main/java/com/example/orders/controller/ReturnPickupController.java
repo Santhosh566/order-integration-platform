@@ -31,7 +31,7 @@ public class ReturnPickupController {
 
     @GetMapping("/api/delivery/pickups/available")
     public List<Map<String, Object>> available() {
-        return pickups.available();
+        return pickups.available(driver());
     }
 
     @GetMapping("/api/delivery/pickups/mine")

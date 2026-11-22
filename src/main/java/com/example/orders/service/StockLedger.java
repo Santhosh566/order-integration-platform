@@ -10,15 +10,18 @@ import com.example.orders.security.Viewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The only way stock quantities change. Each change is applied to the product's row and written
- * to stock_movements in the same transaction, so the ledger and the balances always agree.
+ * The only way stock quantities change. Stock is kept per warehouse (warehouse_stock); each change is applied to
+ * that warehouse's row, to the product's totals over all warehouses (inventory), and written to stock_movements, in
+ * one transaction, so the ledger, the warehouses and the totals always agree.
  *
- * Callers pass a row they hold the lock on (InventoryRepository.findForUpdate).
+ * Callers pass a product row they hold the lock on (InventoryRepository.findForUpdate); the warehouse's row is
+ * locked here, after it. Everything locks products first, then warehouse rows, so two orders cannot deadlock.
  */
 @Service
 public class StockLedger {
@@ -26,44 +29,59 @@ public class StockLedger {
     private static final Logger log = LoggerFactory.getLogger(StockLedger.class);
 
     private final StockMovementRepository movements;
+    private final JdbcTemplate jdbc;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
     private final CurrentUser currentUser;
     private final CustomerNotificationService notifications;
     private final String stockAlertEmail;
     private final WishlistService wishlist;
 
-    public StockLedger(StockMovementRepository movements,
+    public StockLedger(StockMovementRepository movements, JdbcTemplate jdbc,
+                       com.example.orders.warehouse.WarehouseService warehouses,
                        CurrentUser currentUser,
                        CustomerNotificationService notifications,
                        @Value("${orders.catalog.stock-alert-email:}") String stockAlertEmail,
                        WishlistService wishlist) {
         this.movements = movements;
+        this.jdbc = jdbc;
+        this.warehouses = warehouses;
         this.currentUser = currentUser;
         this.notifications = notifications;
         this.stockAlertEmail = stockAlertEmail;
         this.wishlist = wishlist;
     }
 
+    /** One warehouse's balances of one product. */
+    public record Balance(int available, int reserved) {}
+
     /**
+     * @param warehouseId     the warehouse whose stock changes
      * @param availableChange added to available stock (negative takes away)
      * @param reservedChange  added to reserved stock (negative takes away)
-     * @throws InvalidOrderStateException when either balance would go below zero
+     * @throws InvalidOrderStateException when a balance of the warehouse would go below zero
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public StockMovement record(InventoryItem lockedItem, StockMovement.Type type, int availableChange,
+    public StockMovement record(InventoryItem lockedItem, long warehouseId, StockMovement.Type type, int availableChange,
                                 int reservedChange, String orderId, String reason) {
-        int availableBefore = lockedItem.getAvailableQuantity();
-        int available = availableBefore + availableChange;
-        int reserved = lockedItem.getReservedQuantity() + reservedChange;
+        String sku = lockedItem.getSku();
+        Balance before = lock(warehouseId, sku);
+        int available = before.available() + availableChange;
+        int reserved = before.reserved() + reservedChange;
         if (available < 0 || reserved < 0) {
-            throw new InvalidOrderStateException("Not enough stock of " + lockedItem.getSku() + ": "
-                    + availableBefore + " available, " + lockedItem.getReservedQuantity() + " reserved");
+            throw new InvalidOrderStateException("Not enough stock of " + sku + " in " + code(warehouseId) + ": "
+                    + before.available() + " available, " + before.reserved() + " reserved");
         }
-        lockedItem.setAvailableQuantity(available);
-        lockedItem.setReservedQuantity(reserved);
-        StockMovement movement = movements.save(new StockMovement(
-                lockedItem, type, availableChange, reservedChange, orderId, reason, actor()));
+        jdbc.update("update warehouse_stock set available_quantity = ?, reserved_quantity = ? where warehouse_id = ? and sku = ?",
+                available, reserved, warehouseId, sku);
 
-        log.info("[STOCK] {} {}: available {} ({}{}), reserved {} ({}{}){}", type, lockedItem.getSku(),
+        // The product's totals over all warehouses, which the shop reads
+        int availableBefore = lockedItem.getAvailableQuantity();
+        lockedItem.setAvailableQuantity(Math.max(0, availableBefore + availableChange));
+        lockedItem.setReservedQuantity(Math.max(0, lockedItem.getReservedQuantity() + reservedChange));
+        StockMovement movement = movements.save(new StockMovement(sku, warehouseId, type, availableChange, reservedChange,
+                available, reserved, orderId, reason, actor()));
+
+        log.info("[STOCK] {} {} in {}: available {} ({}{}), reserved {} ({}{}){}", type, sku, code(warehouseId),
                 available, availableChange >= 0 ? "+" : "", availableChange,
                 reserved, reservedChange >= 0 ? "+" : "", reservedChange,
                 orderId != null ? " for order " + orderId : "");
@@ -74,6 +92,30 @@ public class StockLedger {
             wishlist.productAvailable(lockedItem);
         }
         return movement;
+    }
+
+    /** The warehouse an order's stock is in: the one it was reserved from. */
+    public long warehouseOf(com.example.orders.model.Order order) {
+        return warehouses.of(order);
+    }
+
+    /** A warehouse's balances of a product, without locking; zero when it has none. */
+    public Balance balance(long warehouseId, String sku) {
+        return jdbc.query("select available_quantity, reserved_quantity from warehouse_stock where warehouse_id = ? and sku = ?",
+                (rs, n) -> new Balance(rs.getInt(1), rs.getInt(2)), warehouseId, sku).stream().findFirst()
+                .orElse(new Balance(0, 0));
+    }
+
+    /** The warehouse's row for the product, created empty if missing, locked until the transaction ends. */
+    private Balance lock(long warehouseId, String sku) {
+        jdbc.update("insert into warehouse_stock (warehouse_id, sku) values (?, ?) on conflict do nothing", warehouseId, sku);
+        return jdbc.queryForObject("select available_quantity, reserved_quantity from warehouse_stock "
+                + "where warehouse_id = ? and sku = ? for update", (rs, n) -> new Balance(rs.getInt(1), rs.getInt(2)), warehouseId, sku);
+    }
+
+    private String code(long warehouseId) {
+        return jdbc.queryForList("select code from warehouses where warehouse_id = ?", String.class, warehouseId)
+                .stream().findFirst().orElse("warehouse " + warehouseId);
     }
 
     /** Who changed the stock: the signed-in user, or "system" for the order pipeline. */

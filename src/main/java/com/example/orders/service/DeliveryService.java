@@ -59,6 +59,7 @@ public class DeliveryService {
     private final ReturnPickupRepository returnPickups;
     private final CustomerNotificationService notifications;
     private final com.example.orders.delivery.DriverPay pay;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
 
     public DeliveryService(OrderRepository orderRepository,
                            OrderStateService orderStateService,
@@ -69,7 +70,9 @@ public class DeliveryService {
                            DeliveryCodeGenerator codeGenerator,
                            CustomerNotificationService notifications,
                            ReturnPickupRepository returnPickups,
-                           com.example.orders.delivery.DriverPay pay) {
+                           com.example.orders.delivery.DriverPay pay,
+                           com.example.orders.warehouse.WarehouseService warehouses) {
+        this.warehouses = warehouses;
         this.returnPickups = returnPickups;
         this.pay = pay;
         this.orderRepository = orderRepository;
@@ -82,9 +85,16 @@ public class DeliveryService {
         this.notifications = notifications;
     }
 
+    /** Orders nobody has taken, from the warehouse the driver works from. */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> available(String driverId) {
+        long home = warehouses.homeOf(driverId);
+        return available().stream().filter(row -> Long.valueOf(home).equals(row.get("warehouseId"))).toList();
+    }
+
     /**
-     * Orders nobody has taken. Only the area is shown: the name, phone and street are for the
-     * driver who takes the order.
+     * Orders nobody has taken, from every warehouse (the admin's board). Only the area is shown: the name, phone
+     * and street are for the driver who takes the order.
      */
     @Transactional(readOnly = true)
     public List<Map<String, Object>> available() {
@@ -99,6 +109,9 @@ public class DeliveryService {
             row.put("orderId", order.getOrderId());
             row.put("version", order.getVersion());
             row.put("status", order.getStatus());
+            long from = warehouses.of(order);
+            row.put("warehouseId", from);
+            row.put("warehouse", warehouses.codeOf(from));
             row.put("city", address.getCity());
             row.put("state", address.getState());
             row.put("postalCode", address.getPostalCode());
@@ -124,6 +137,7 @@ public class DeliveryService {
     public Map<String, Object> take(String driverId, String orderId) {
         Order order = orderStateService.lock(orderId);
         requireAwaitingDriver(order);
+        requireSameWarehouse(order, driverId, true);
         if (assignments.findLive(orderId).isPresent()) {
             throw new InvalidOrderStateException("Order " + orderId + " was already taken by another driver");
         }
@@ -148,6 +162,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new InvalidOrderException(driverId + " is not an active delivery user"));
         Order order = orderStateService.lock(orderId, expectedVersion);
         requireAwaitingDriver(order);
+        requireSameWarehouse(order, driver.getUserId(), false);
         assignments.findLive(orderId).ifPresent(current -> {
             if (current.getStatus() == DeliveryStatus.PICKED_UP) {
                 throw new InvalidOrderStateException("Order " + orderId + " is already with " + current.getDeliveryUserId());
@@ -159,6 +174,20 @@ public class DeliveryService {
         DeliveryAssignment assignment = assignments.saveAndFlush(newAttempt(order, driver.getUserId()));
         log.info("[DELIVERY] Admin assigned order {} to {}", orderId, driverId);
         return details(order, assignment);
+    }
+
+    /**
+     * A driver collects parcels at their own warehouse: an order packed in another one is not theirs to take or be
+     * given. (409 for the driver taking it, 400 for an admin assigning it.)
+     */
+    private void requireSameWarehouse(Order order, String driverId, boolean byDriver) {
+        long from = warehouses.of(order);
+        long home = warehouses.homeOf(driverId);
+        if (from != home) {
+            String message = "Order " + order.getOrderId() + " ships from " + warehouses.codeOf(from) + ", and "
+                    + (byDriver ? "you work" : driverId + " works") + " from " + warehouses.codeOf(home);
+            throw byDriver ? new InvalidOrderStateException(message) : new InvalidOrderException(message);
+        }
     }
 
     @Transactional
@@ -312,6 +341,9 @@ public class DeliveryService {
                     row.put("fullName", u.getFullName());
                     row.put("phone", u.getPhone());
                     row.put("activeDeliveries", load.getOrDefault(u.getUserId(), 0L));
+                    long home = warehouses.homeOf(u.getUserId());
+                    row.put("warehouseId", home);
+                    row.put("warehouse", warehouses.codeOf(home));
                     return row;
                 })
                 .toList();

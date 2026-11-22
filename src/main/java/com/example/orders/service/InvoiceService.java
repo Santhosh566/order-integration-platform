@@ -54,13 +54,16 @@ public class InvoiceService {
     private final String sellerName;
     private final String sellerAddress;
     private final Path invoiceDir;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
 
     public InvoiceService(OrderRepository orderRepository,
                           OrderStateService orderStateService,
                           InvoiceNumberService invoiceNumbers,
                           @Value("${orders.seller.legal-name}") String sellerName,
                           @Value("${orders.seller.address}") String sellerAddress,
-                          @Value("${orders.invoice-dir}") String invoiceDir) {
+                          @Value("${orders.invoice-dir}") String invoiceDir,
+                          com.example.orders.warehouse.WarehouseService warehouses) {
+        this.warehouses = warehouses;
         this.orderRepository = orderRepository;
         this.orderStateService = orderStateService;
         this.invoiceNumbers = invoiceNumbers;
@@ -99,8 +102,11 @@ public class InvoiceService {
 
             Font metaFont = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
             Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK);
+            // The registration that ships it: the warehouse's address and GSTIN
+            com.example.orders.warehouse.WarehouseService.Warehouse from = order.getWarehouseId() == null ? null
+                    : warehouses.get(order.getWarehouseId());
             document.add(new Paragraph(sellerName, boldFont));
-            document.add(new Paragraph(sellerAddress, metaFont));
+            document.add(new Paragraph(from != null ? from.address() + " " + from.pin() : sellerAddress, metaFont));
             document.add(new Paragraph("GSTIN: " + orElse(order.getSellerGstin(), "Not registered"), metaFont));
             document.add(new Paragraph(" "));
 
@@ -294,7 +300,8 @@ public class InvoiceService {
         }
         if (order.getInvoiceNumber() == null) {
             LocalDate today = LocalDate.now();
-            order.setInvoiceNumber(invoiceNumbers.next(InvoiceNumberService.Series.INVOICE, today));
+            // Numbered in the series of the GSTIN it is issued under (the warehouse's)
+            order.setInvoiceNumber(invoiceNumbers.next(InvoiceNumberService.Series.INVOICE, warehouses.of(order), today));
             order.setInvoiceDate(today);
             orderRepository.save(order);
         }

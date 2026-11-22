@@ -150,12 +150,26 @@ class CustomerDataIT extends IntegrationTestBase {
     // ── Fulfillment hubs ────────────────────────────────────────────────────
 
     @Test
-    void regionalHub_followsTheDestinationState() {
-        assertThat(hubsFor("CUST-100", address("Bengaluru", "Karnataka"))).contains("hubSouth");
-        assertThat(hubsFor("CUST-100", address("Mumbai", "MH"))).contains("hubWest");
-        assertThat(hubsFor("CUST-100", address("Lucknow", "Uttar Pradesh"))).contains("hubNorth");
-        assertThat(hubsFor("CUST-100", address("Kolkata", "19"))).contains("hubEast");
-        assertThat(hubsFor("CUST-100", null)).isEqualTo("direct:hubCentral");
+    void thePickListGoesToTheWarehouseTheOrderShipsFrom_whereverTheCustomerIs() {
+        // Every order: its warehouse and head office, whatever the delivery state
+        assertThat(hubsFor("CUST-100", address("Lucknow", "Uttar Pradesh"))).startsWith("direct:warehouseHub,direct:hubCentral");
+        assertThat(hubsFor("CUST-100", address("Bengaluru", "Karnataka"))).startsWith("direct:warehouseHub,direct:hubCentral");
+        assertThat(routing.resolveFulfillmentRecipients(null)).isEqualTo("direct:hubCentral");
+
+        stockJdbc.update("insert into warehouses (code, name, address, pin, state_code, gstin, location, invoice_prefix, credit_note_prefix) "
+                + "values ('GGN', 'Gurugram fulfilment centre', 'Sector 37, Gurugram, Haryana', '122001', '06', '06AABCO1234F1Z9', "
+                + "ST_SetSRID(ST_MakePoint(77.0266, 28.4595), 4326)::geography, 'GGI', 'GGC') on conflict (code) do nothing");
+        Long ggn = stockJdbc.queryForObject("select warehouse_id from warehouses where code = 'GGN'", Long.class);
+        Order fromGurugram = new Order();
+        fromGurugram.setOrderId("ORD-" + shortId());
+        fromGurugram.setShippingAddress(address("Bengaluru", "Karnataka"));
+        fromGurugram.setWarehouseId(ggn);
+        // Delivered in Karnataka, but packed in Gurugram: Gurugram gets the pick list
+        assertThat(routing.pickListWarehouse(fromGurugram).code()).isEqualTo("GGN");
+        // Orders from before warehouses were recorded: the default one
+        Order old = new Order();
+        old.setOrderId("ORD-" + shortId());
+        assertThat(routing.pickListWarehouse(old).code()).isEqualTo("BLR");
     }
 
     @Test

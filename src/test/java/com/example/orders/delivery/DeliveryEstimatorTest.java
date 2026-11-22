@@ -62,6 +62,34 @@ class DeliveryEstimatorTest {
     }
 
     @Test
+    void fromAWarehouse_theDaysFollowItsDistance_andItsOwnCutOff() {
+        // Monday 11:30, a warehouse 12 km away that packs until 4 PM: leaves today, there tomorrow
+        DeliveryEstimator.ShipFrom near = new DeliveryEstimator.ShipFrom("Bengaluru fulfilment centre", java.time.LocalTime.of(16, 0), 12.0);
+        DeliveryEstimator.Estimate e = ESTIMATOR.estimate("560038", true, at(10, 11, 30), near);
+        assertThat(e.earliest()).isEqualTo(LocalDate.of(2026, 11, 11));
+        assertThat(e.dispatchCountdown()).isEqualTo(Duration.ofMinutes(270));
+        assertThat(e.shipsFrom()).isEqualTo("Bengaluru fulfilment centre");
+        // 3 PM is past the default 2 PM cut-off, but this warehouse still packs: still leaves today
+        assertThat(ESTIMATOR.estimate("560038", true, at(10, 15, 0), near).earliest()).isEqualTo(LocalDate.of(2026, 11, 11));
+        // 1,700 km away (Gurugram to Bengaluru): 4 days on the road
+        DeliveryEstimator.ShipFrom far = new DeliveryEstimator.ShipFrom("Gurugram fulfilment centre", java.time.LocalTime.of(14, 0), 1_700.0);
+        assertThat(ESTIMATOR.estimate("560038", true, at(10, 11, 30), far).earliest()).isEqualTo(LocalDate.of(2026, 11, 14));
+        // A PIN without a position: the usual two days
+        DeliveryEstimator.ShipFrom unknown = new DeliveryEstimator.ShipFrom("Somewhere", java.time.LocalTime.of(14, 0), null);
+        assertThat(ESTIMATOR.estimate("560038", true, at(10, 11, 30), unknown).earliest()).isEqualTo(LocalDate.of(2026, 11, 12));
+    }
+
+    @Test
+    void transitDaysGrowWithDistance() {
+        assertThat(DeliveryEstimator.transitDays(0)).isEqualTo(1);
+        assertThat(DeliveryEstimator.transitDays(50)).isEqualTo(1);
+        assertThat(DeliveryEstimator.transitDays(51)).isEqualTo(2);
+        assertThat(DeliveryEstimator.transitDays(400)).isEqualTo(2);
+        assertThat(DeliveryEstimator.transitDays(1_200)).isEqualTo(3);
+        assertThat(DeliveryEstimator.transitDays(1_201)).isEqualTo(4);
+    }
+
+    @Test
     void theNorthEastTakesLonger_andAnUnknownPinIsRefused() {
         assertThat(ESTIMATOR.estimate("795001", true, at(10, 11, 0)).earliest()).isEqualTo(LocalDate.of(2026, 11, 16));
         assertThat(ESTIMATOR.estimate("110001", true, at(10, 11, 0)).outcome()).isEqualTo(DeliveryEstimator.Outcome.UNKNOWN_PIN);

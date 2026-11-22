@@ -39,12 +39,15 @@ public class CatalogueGraphQlController {
     private final DeliveryEstimator estimator;
     private final com.example.orders.service.ReviewService reviews;
     private final com.example.orders.service.ProductOffers offers;
+    private final com.example.orders.warehouse.WarehouseAllocator allocator;
 
     public CatalogueGraphQlController(CatalogueSearch search, CategoryRepository categories,
                                       ProductImageRepository images, ProductSpecRepository specs,
                                       DeliveryEstimator estimator, com.example.orders.service.ReviewService reviews,
-                                      com.example.orders.service.ProductOffers offers) {
+                                      com.example.orders.service.ProductOffers offers,
+                                      com.example.orders.warehouse.WarehouseAllocator allocator) {
         this.offers = offers;
+        this.allocator = allocator;
         this.estimator = estimator;
         this.reviews = reviews;
         this.search = search;
@@ -98,17 +101,18 @@ public class CatalogueGraphQlController {
 
     public record DeliveryEstimateView(String outcome, String pin, String district, String state, String earliest,
                                        String latest, boolean approximate, Integer minutesToCutOff,
-                                       List<HolidayNote> holidays) {}
+                                       List<HolidayNote> holidays, String shipsFrom) {}
 
     @QueryMapping
     public DeliveryEstimateView deliveryEstimate(@Argument String sku, @Argument String pin) {
         Product product = search.product(sku);
-        boolean inStock = product != null && !"OUT_OF_STOCK".equals(product.stockStatus());
-        DeliveryEstimator.Estimate e = estimator.estimate(pin, inStock);
+        // From the nearest warehouse that has it: its distance and cut-off time set the days
+        DeliveryEstimator.Estimate e = estimator.estimate(pin,
+                product == null ? null : allocator.nearestHolding(sku, pin == null ? "" : pin.replaceAll("\\s", "")).orElse(null));
         return new DeliveryEstimateView(e.outcome().name(), e.pin(), e.district(), e.state(),
                 e.earliest() == null ? null : e.earliest().toString(), e.latest() == null ? null : e.latest().toString(),
                 e.approximate(), e.dispatchCountdown() == null ? null : (int) e.dispatchCountdown().toMinutes(),
-                e.holidays().stream().map(h -> new HolidayNote(h.day().toString(), h.name())).toList());
+                e.holidays().stream().map(h -> new HolidayNote(h.day().toString(), h.name())).toList(), e.shipsFrom());
     }
 
     @SchemaMapping(typeName = "Product")

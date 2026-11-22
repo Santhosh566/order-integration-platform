@@ -24,8 +24,11 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
     private final DriverStatsService stats;
     private final CurrentUser currentUser;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
 
-    public DeliveryController(DeliveryService deliveryService, DriverStatsService stats, CurrentUser currentUser) {
+    public DeliveryController(DeliveryService deliveryService, DriverStatsService stats, CurrentUser currentUser,
+                              com.example.orders.warehouse.WarehouseService warehouses) {
+        this.warehouses = warehouses;
         this.deliveryService = deliveryService;
         this.stats = stats;
         this.currentUser = currentUser;
@@ -42,9 +45,15 @@ public class DeliveryController {
         return stats.history(driver(), period);
     }
 
+    /** The warehouse the driver works from: where they collect parcels and bring returns. */
+    @GetMapping("/warehouse")
+    public com.example.orders.warehouse.WarehouseService.Warehouse warehouse() {
+        return warehouses.get(warehouses.homeOf(driver()));
+    }
+
     @GetMapping("/available")
     public List<Map<String, Object>> available() {
-        return deliveryService.available();
+        return deliveryService.available(driver());
     }
 
     @GetMapping("/mine")

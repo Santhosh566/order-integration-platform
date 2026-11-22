@@ -41,20 +41,37 @@ public class CheckoutController {
     public record Quote(List<QuoteLine> items, BigDecimal itemsTotal, BigDecimal discount, BigDecimal total,
                         BigDecimal taxTotal, BigDecimal cgstTotal, BigDecimal sgstTotal, BigDecimal igstTotal,
                         String currency, String couponCode, String couponError,
-                        CheckoutService.CashOnDelivery cashOnDelivery) {}
+                        CheckoutService.CashOnDelivery cashOnDelivery, ShipsFrom shipsFrom, String shippingProblem) {}
+
+    /** The warehouse the order would ship from: its city for the customer, and its state for the GST split. */
+    public record ShipsFrom(String code, String name, String stateCode) {}
 
     private final CatalogService catalog;
     private final CheckoutService checkout;
     private final CurrentUser currentUser;
     private final TransactionTemplate readOnly;
+    private final com.example.orders.warehouse.WarehouseAllocator allocator;
 
     public CheckoutController(CatalogService catalog, CheckoutService checkout, CurrentUser currentUser,
-                              PlatformTransactionManager transactions) {
+                              PlatformTransactionManager transactions, com.example.orders.warehouse.WarehouseAllocator allocator) {
+        this.allocator = allocator;
         this.catalog = catalog;
         this.checkout = checkout;
         this.currentUser = currentUser;
         this.readOnly = new TransactionTemplate(transactions);
         this.readOnly.setReadOnly(true);
+    }
+
+    /** Where it ships from, when one warehouse has everything. */
+    private ShipsFrom shipsFrom(Order order) {
+        com.example.orders.warehouse.WarehouseAllocator.Choice choice = allocator.choose(order);
+        return choice.warehouse() == null ? null
+                : new ShipsFrom(choice.warehouse().code(), choice.warehouse().name(), choice.warehouse().stateCode());
+    }
+
+    /** "Order them separately", when the shop has everything but not in one warehouse; placing it would be refused. */
+    private String shippingProblem(Order order) {
+        return allocator.choose(order).problem();
     }
 
     @PostMapping("/api/checkout/quote")
@@ -75,7 +92,7 @@ public class CheckoutController {
                     i.getPrice(), i.listAmount(), i.getDiscount(), i.getLineTotal(), i.getGstRate())).toList(),
                     itemsTotal, order.getDiscountTotal(), order.getTotal(), order.getTaxTotal(), order.getCgstTotal(),
                     order.getSgstTotal(), order.getIgstTotal(), order.getCurrency(), order.getCouponCode(), couponError,
-                    checkout.cashOnDelivery(order.getCustomerId(), order.getTotal()));
+                    checkout.cashOnDelivery(order.getCustomerId(), order.getTotal()), shipsFrom(order), shippingProblem(order));
         });
     }
 

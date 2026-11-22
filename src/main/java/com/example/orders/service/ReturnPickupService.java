@@ -49,11 +49,14 @@ public class ReturnPickupService {
     private final OrderRepository orders;
 
     private final com.example.orders.delivery.DriverPay pay;
+    private final com.example.orders.warehouse.WarehouseService warehouses;
 
     public ReturnPickupService(ReturnRequestRepository returns, ReturnPickupRepository pickups, AppUserRepository users,
                                OrderStateService orderStateService, DeliveryCodeGenerator codeGenerator,
                                CustomerNotificationService notifications, OrderRepository orders,
-                               com.example.orders.delivery.DriverPay pay) {
+                               com.example.orders.delivery.DriverPay pay,
+                               com.example.orders.warehouse.WarehouseService warehouses) {
+        this.warehouses = warehouses;
         this.pay = pay;
         this.returns = returns;
         this.pickups = pickups;
@@ -64,9 +67,31 @@ public class ReturnPickupService {
         this.orders = orders;
     }
 
+    /** Returned goods go to the warehouse that shipped them, so its drivers collect them. */
+    private void requireSameWarehouse(ReturnRequest ret, String driverId, boolean byDriver) {
+        Order order = orders.findById(ret.getOrderId()).orElse(null);
+        if (order == null) {
+            return;
+        }
+        long to = warehouses.of(order);
+        long home = warehouses.homeOf(driverId);
+        if (to != home) {
+            String message = "Return " + ret.getReturnId() + " goes back to " + warehouses.codeOf(to) + ", and "
+                    + (byDriver ? "you work" : driverId + " works") + " from " + warehouses.codeOf(home);
+            throw byDriver ? new InvalidOrderStateException(message) : new com.example.orders.exception.InvalidOrderException(message);
+        }
+    }
+
     // ── Lists ──────────────────────────────────────────────────────────────────
 
-    /** Approved returns nobody is collecting yet, oldest approval first. Area only, like orders. */
+    /** Returns waiting to be collected that go back to the warehouse the driver works from. */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> available(String driverId) {
+        long home = warehouses.homeOf(driverId);
+        return available().stream().filter(row -> Long.valueOf(home).equals(row.get("warehouseId"))).toList();
+    }
+
+    /** Approved returns nobody is collecting yet, oldest approval first, every warehouse. Area only, like orders. */
     @Transactional(readOnly = true)
     public List<Map<String, Object>> available() {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -82,6 +107,10 @@ public class ReturnPickupService {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("returnId", ret.getReturnId());
             row.put("orderId", ret.getOrderId());
+            // Back to the warehouse that shipped it
+            long to = warehouses.of(order);
+            row.put("warehouseId", to);
+            row.put("warehouse", warehouses.codeOf(to));
             row.put("city", address.getCity());
             row.put("state", address.getState());
             row.put("postalCode", address.getPostalCode());
@@ -139,6 +168,7 @@ public class ReturnPickupService {
     @Transactional
     public Map<String, Object> take(String driverId, String returnId) {
         ReturnRequest ret = lockApproved(returnId);
+        requireSameWarehouse(ret, driverId, true);
         if (pickups.findLive(returnId).isPresent()) {
             throw new InvalidOrderStateException("Return " + returnId + " is already being collected");
         }
@@ -232,6 +262,7 @@ public class ReturnPickupService {
                 .filter(u -> u.isActive() && u.getRoles().contains(Role.DELIVERY))
                 .orElseThrow(() -> new InvalidOrderException(driverId + " is not an active delivery user"));
         ReturnRequest ret = lockApproved(returnId);
+        requireSameWarehouse(ret, driver.getUserId(), false);
         pickups.findLive(returnId).ifPresent(current -> {
             if (current.getStatus() == ReturnPickup.Status.ON_THE_WAY) {
                 throw new InvalidOrderStateException("Return " + returnId + " is already on its way with "

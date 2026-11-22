@@ -120,6 +120,9 @@ abstract class IntegrationTestBase {
     @Autowired
     InventoryRepository inventoryRepository;
 
+    @Autowired
+    org.springframework.jdbc.core.JdbcTemplate stockJdbc;
+
     @BeforeEach
     void pointRestAssuredAtTheApp() {
         RestAssured.port = port;
@@ -142,7 +145,19 @@ abstract class IntegrationTestBase {
     String newSku(int available) {
         String sku = "SKU-" + UUID.randomUUID().toString().substring(0, 8);
         inventoryRepository.save(new InventoryItem(sku, "Test product", new BigDecimal("10.00"), available));
+        inDefaultWarehouse(sku, available, 0);
         return sku;
+    }
+
+    /**
+     * Puts a product's stock in the default warehouse, as the product's totals say. Stock is kept per warehouse
+     * (V29); tests that write the totals directly call this so the warehouse agrees.
+     */
+    void inDefaultWarehouse(String sku, int available, int reserved) {
+        stockJdbc.update("insert into warehouse_stock (warehouse_id, sku, available_quantity, reserved_quantity) "
+                + "select warehouse_id, ?, ?, ? from warehouses where is_default on conflict (warehouse_id, sku) do update "
+                + "set available_quantity = excluded.available_quantity, reserved_quantity = excluded.reserved_quantity",
+                sku, available, reserved);
     }
 
     /** Orders are charged the catalogue price, so a test that needs another price sets it here. */

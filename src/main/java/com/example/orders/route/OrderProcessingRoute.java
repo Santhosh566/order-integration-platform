@@ -359,7 +359,8 @@ public class OrderProcessingRoute extends RouteBuilder {
             .setProperty("currentOrder", body())
 
             // Phase 2.6: Recipient List EIP
-            // Dynamically determines warehouse fulfillment hubs based on shipping destination, cargo value, and partner status
+            // The warehouse the order ships from, head office, and (by value and partner status) the white-glove desk
+            // and the dropship partner, worked out per order
             .setHeader("fulfillmentHubRecipients", method(WarehouseRoutingService.class, "resolveFulfillmentRecipients(${exchangeProperty.currentOrder})"))
             .recipientList(header("fulfillmentHubRecipients"), ",").parallelProcessing();
 
@@ -478,32 +479,19 @@ public class OrderProcessingRoute extends RouteBuilder {
                  "[SMS DISPATCH] Sent SMS to customer ${exchangeProperty.customerProfile.customerId}: ${exchangeProperty.notification.subject}");
 
         // =========================================================================
-        // Recipient List EIP Destinations (Dynamic Regional Distribution Centers)
+        // Recipient List EIP destinations
         // =========================================================================
-        from("direct:hubNorth")
-            .routeId("hub-north")
-            .log(LoggingLevel.INFO,
-                 "[RECIPIENT LIST: NORTH HUB] Physical manifest received at Gurugram Fulfilment Centre (HR) for Order: ${exchangeProperty.currentOrderId}");
-
-        from("direct:hubSouth")
-            .routeId("hub-south")
-            .log(LoggingLevel.INFO,
-                 "[RECIPIENT LIST: SOUTH HUB] Physical manifest received at Bengaluru Fulfilment Centre (KA) for Order: ${exchangeProperty.currentOrderId}");
-
-        from("direct:hubEast")
-            .routeId("hub-east")
-            .log(LoggingLevel.INFO,
-                 "[RECIPIENT LIST: EAST HUB] Physical manifest received at Kolkata Fulfilment Centre (WB) for Order: ${exchangeProperty.currentOrderId}");
-
-        from("direct:hubWest")
-            .routeId("hub-west")
-            .log(LoggingLevel.INFO,
-                 "[RECIPIENT LIST: WEST HUB] Physical manifest received at Bhiwandi Fulfilment Centre (MH) for Order: ${exchangeProperty.currentOrderId}");
+        // The pick list goes to the warehouse the order's stock was reserved in (any warehouse, the ones an admin
+        // opens later too). A real warehouse system would be called here; the log stands in for it.
+        // Kept in a property, not the body: the recipient list hands on its last branch's message
+        from("direct:warehouseHub")
+            .routeId("warehouse-hub")
+            .setProperty("pickListWarehouse", method(WarehouseRoutingService.class, "pickListWarehouse"));
 
         from("direct:hubCentral")
             .routeId("hub-central")
             .log(LoggingLevel.INFO,
-                 "[RECIPIENT LIST: CENTRAL HUB] Physical manifest received at Nagpur Logistics Centre (MH) for Order: ${exchangeProperty.currentOrderId}");
+                 "[RECIPIENT LIST: HEAD OFFICE] Operations told of order ${exchangeProperty.currentOrderId}");
 
         from("direct:hubPriorityWhiteGlove")
             .routeId("hub-priority-white-glove")

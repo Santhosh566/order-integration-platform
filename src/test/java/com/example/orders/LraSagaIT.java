@@ -203,6 +203,7 @@ class LraSagaIT extends IntegrationTestBase {
     private String stock(int available, int reserved) {
         String sku = "SKU-" + UUID.randomUUID().toString().substring(0, 8);
         inventoryRepository.save(new InventoryItem(sku, available, reserved));
+        inDefaultWarehouse(sku, available, reserved);
         return sku;
     }
 

@@ -30,6 +30,8 @@ type DeliveryEstimate {
     approximate: Boolean!
     "Minutes left to order for dispatch today; null when it goes out on a later day."
     minutesToCutOff: Int
+    "The warehouse that would ship it: the nearest one with it in stock."
+    shipsFrom: String
     "Public holidays from today to the latest day, which the estimate skipped."
     holidays: [HolidayNote!]!
 }
